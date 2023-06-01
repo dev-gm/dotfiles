@@ -87,7 +87,7 @@
 		       %base-groups))
 
 (define %packages (append
-		    (list intel-media-driver wpa-supplicant nss-certs vim bluez)
+		    (list intel-media-driver wpa-supplicant nss-certs vim bluez bluez-alsa)
 		    %base-packages))
 
 (define %nftables-ruleset %default-nftables-ruleset)
