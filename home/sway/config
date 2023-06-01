@@ -65,11 +65,11 @@ input type:touchpad {
 xwayland enable
 
 set $refresh_i3status killall -SIGUSR1 i3status
-#bindsym XF86AudioMute exec --no-startup-id pactl set-sink-mute @DEFAULT_SINK@ toggle && $refresh_i3status
-#bindsym XF86AudioLowerVolume exec --no-startup-id pactl set-sink-volume @DEFAULT_SINK@ -5% && $refresh_i3status
-#bindsym XF86AudioRaiseVolume exec --no-startup-id pactl set-sink-volume @DEFAULT_SINK@ +5% && $refresh_i3status
-#bindsym XF86MonBrightnessDown exec --no-startup-id sudo light -U 5
-#bindsym XF86MonBrightnessUp exec --no-startup-id sudo light -A 5
+bindsym XF86AudioMute exec --no-startup-id pactl set-sink-mute @DEFAULT_SINK@ toggle && $refresh_i3status
+bindsym XF86AudioLowerVolume exec --no-startup-id pactl set-sink-volume @DEFAULT_SINK@ -5% && $refresh_i3status
+bindsym XF86AudioRaiseVolume exec --no-startup-id pactl set-sink-volume @DEFAULT_SINK@ +5% && $refresh_i3status
+bindsym XF86MonBrightnessDown exec --no-startup-id sudo light -U 5
+bindsym XF86MonBrightnessUp exec --no-startup-id sudo light -A 5
 #bindsym XF86AudioMedia exec --no-startup-id $lock
 #bindsym XF86RFKill exec --no-startup-id "/home/gavin/.scripts/toggle-bluetooth"
 #bindsym $mod+Shift+b exec --no-startup-id "sudo rfkill toggle 0"
