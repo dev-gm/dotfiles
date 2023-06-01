@@ -1,0 +1,304 @@
+### Variables
+#
+# Logo key. Use Mod1 for Alt.
+set $mod Mod4
+
+exec --no-startup-id swaymsg "workspace 0"
+
+# Home row direction keys, like vim
+set $left h
+set $down j
+set $up k
+set $right l
+
+set $move Shift
+
+# Your preferred terminal emulator
+set $term alacritty
+
+# Your preferred application launcher Note: pass the final command to swaymsg
+# so that the resulting window can be opened
+# on the original workspace that the command was run on.
+set $menu bemenu-run -p '$PATH/' | xargs swaymsg exec --
+
+set $lock swaylock -f -c 000000 -s fill
+
+### Output configuration
+
+# Default wallpaper (more resolutions are available in /usr/share/backgrounds/sway/)
+output * bg $HOME/.config/sway/blobs-d.svg fill
+
+# Example configuration:
+
+output eDP-1 scale 1.33
+output DP-1 mode 2560x1440@144Hz
+
+# You can get the names of your outputs by running: swaymsg -t get_outputs
+
+font pango:DejavuSansMono Bold 8
+
+seat seat0 xcursor_theme McMojave-cursors 18
+
+### Idle configuration
+#
+# exec swayidle timeout 180 'swaymsg "output * dpms off"' resume 'swaymsg "output * dpms on"' timeout 240 'sudo zzz' timeout 600 'sudo zzz & swaylock -f -c 000000'
+# exec swayidle timeout 240 'swaymsg "output * dpms off"' resume 'swaymsg "output * dpms on"' timeout 480 "$lock"
+
+### Input configuration
+#
+# Example configuration:
+#
+input type:touchpad {
+	dwt disabled
+	tap enabled
+	natural_scroll enabled
+	middle_emulation enabled
+	accel_profile adaptive
+	scroll_method two_finger
+	click_method clickfinger
+	drag disabled
+}
+
+# You can get the names of your inputs by running: swaymsg -t get_inputs
+# Read `man 5 sway-input` for more information about this section.
+
+xwayland enable
+
+set $refresh_i3status killall -SIGUSR1 i3status
+#bindsym XF86AudioMute exec --no-startup-id pactl set-sink-mute @DEFAULT_SINK@ toggle && $refresh_i3status
+#bindsym XF86AudioLowerVolume exec --no-startup-id pactl set-sink-volume @DEFAULT_SINK@ -5% && $refresh_i3status
+#bindsym XF86AudioRaiseVolume exec --no-startup-id pactl set-sink-volume @DEFAULT_SINK@ +5% && $refresh_i3status
+#bindsym XF86MonBrightnessDown exec --no-startup-id sudo light -U 5
+#bindsym XF86MonBrightnessUp exec --no-startup-id sudo light -A 5
+#bindsym XF86AudioMedia exec --no-startup-id $lock
+#bindsym XF86RFKill exec --no-startup-id "/home/gavin/.scripts/toggle-bluetooth"
+#bindsym $mod+Shift+b exec --no-startup-id "sudo rfkill toggle 0"
+
+#exec_always --no-startup-id "sudo sv down bluetooth && sudo rfkill block 0"
+
+input type:keyboard {
+    xkb_layout us
+    xkb_variant dvp
+    xkb_options compose:102,numpad:shift3,kpdl:semi,keypad:atm,caps:ctrl_modifier
+}
+
+bindsym Alt_R+space input "FRMW0001:00 32AC:0006 Consumer Control" xkb_switch_layout next
+
+# exec_always ~/.config/sway/scripts/import-gsettings
+
+gaps outer 3
+gaps inner 10
+
+default_border pixel 3
+
+# for_window [class="."] border normal 1
+
+smart_borders on
+
+# NAME					TBORDER	BCKGRND	TEXT	???		  WBORDER
+#client.focused          #e5383b #616265 #ffffff #ffffff   #e5383b
+#client.focused_inactive #000000 #651714 #ffffff #ffffff   #660708
+#client.unfocused        #000000 #000000 #ffffff #ffffff   #0b090a
+#client.urgent           #000000 #651714 #ffffff #ffffff   #b1a7a6
+
+### Key bindings
+
+# Basics:
+#
+	for_window [app_id="Picture-in-Picture" class="mpv"] floating enable, sticky enable
+	for_window [window_role="pop-up"] floating enable
+    for_window [window_role="bubble"] floating enable
+    for_window [window_role="task_dialog"] floating enable
+    for_window [window_role="Preferences"] floating enable
+    for_window [window_type="dialog"] floating enable
+    for_window [window_type="menu"] floating enable
+    for_window [window_role="About"] floating enable
+    for_window [class="xdg-desktop-portal-kde"] floating enable
+	for_window [app_id="KeePassXC - Browser Access Request"] floating enable, sticky enable
+	for_window [title="KeePassXC - Browser Access Request"] floating enable, sticky enable
+	for_window [app_id="Unlock Database - KeePassXC"] floating enable, sticky enable
+	for_window [title="Unlock Database - KeePassXC"] floating enable, sticky enable
+    #for_window [class="ksysguard"] floating enable
+    #for_window [class="ksysguard"] sticky enable
+    for_window [app_id="mpv"] layout tabbed
+    #for_window [class="Wine"] floating enable
+    #for_window [app_id="retroarch"] fullscreen
+	#for_window [title="Picture-in-Picture"] border pixel 3
+	#for_window [app_id="firefox" title="^Picture-in-Picture$"] 
+
+	#bindsym $mod+F11 exec $lock
+
+    # Start a terminal
+    bindsym $mod+Return exec $term
+
+    # Kill focused window
+    bindsym $mod+w kill
+
+    # Start your launcher
+    bindsym $mod+e exec . /home/gavin/.profile && $menu
+
+    # Drag floating windows by holding down $mod and left mouse button.
+    # Resize them with right mouse button + $mod.
+    # Despite the name, also works for non-floating windows.
+    # Change normal to inverse to use left mouse button for resizing and right
+    # mouse button for dragging.
+    floating_modifier $mod normal
+
+
+    # Reload the configuration file
+    bindsym $mod+Shift+c reload
+
+    # Exit sway (logs you out of your Wayland session)
+    bindsym $mod+Shift+period exec swaynag -t warning -m 'You pressed the exit shortcut. Do you really want to exit sway? This will end your Wayland session.' -b 'Yes, exit sway' 'swaymsg exit'
+#
+# Moving around:
+#
+    # Move your focus around
+    bindsym $mod+$left focus left
+    bindsym $mod+$down focus down
+    bindsym $mod+$up focus up
+    bindsym $mod+$right focus right
+    # Or use $mod+[up|down|left|right]
+    bindsym $mod+Left focus left
+    bindsym $mod+Down focus down
+    bindsym $mod+Up focus up
+    bindsym $mod+Right focus right
+
+    # Move the focused window with the same, but add Shift
+    bindsym $mod+$move+$left move left
+    bindsym $mod+$move+$right move right
+    bindsym $mod+$move+$down move down
+    bindsym $mod+$move+$up move up
+
+    # Switch to workspace
+    bindsym $mod+bracketleft workspace 7
+    bindsym $mod+braceleft workspace 5
+    bindsym $mod+braceright workspace 3
+    bindsym $mod+parenleft workspace 1
+    bindsym $mod+equal workspace 9
+    bindsym $mod+asterisk workspace 0
+    bindsym $mod+parenright workspace 2
+    bindsym $mod+plus workspace 4
+    bindsym $mod+bracketright workspace 6
+    bindsym $mod+exclam workspace 8
+    # Move focused container to workspace
+    bindsym $mod+Shift+bracketleft move container to workspace 7
+    bindsym $mod+Shift+braceleft move container to workspace 5
+    bindsym $mod+Shift+braceright move container to workspace 3
+    bindsym $mod+Shift+parenleft move container to workspace 1
+    bindsym $mod+Shift+equal move container to workspace 9
+    bindsym $mod+Shift+asterisk move container to workspace 0
+    bindsym $mod+Shift+parenright move container to workspace 2
+    bindsym $mod+Shift+plus move container to workspace 4
+    bindsym $mod+Shift+bracketright move container to workspace 6
+    bindsym $mod+Shift+exclam move container to workspace 8
+    # Note: workspaces can have any name you want, not just numbers.
+    # We just use 1-10 as the default.
+
+    # Applications:
+    bindsym $mod+i exec "firefox"
+	bindsym $mod+g exec "emacs"
+    bindsym $mod+t exec "firefox --new-tab https://classroom.google.com/"
+    bindsym $mod+n exec "torbrowser-launcher"
+    bindsym $mod+d exec "lutris"
+    bindsym $mod+p exec "qutebrowser"
+    bindsym $mod+Shift+d exec "steam"
+    bindsym $mod+c exec "keepassxc"
+    bindsym $mod+m exec "mullvad-gui"
+    bindsym $mod+v exec "pavucontrol"
+	bindsym $mod+Shift+s exec "Discord"
+    #bindsym $mod+g exec 'grimshot'
+	#bindsym $mod+z exec "firejail --apparmor --private=$HOME/.zoom zoom"
+	#bindsym $mod+r exec notify-send "Reconnected wifi" "$(.scripts/s-wifi-reload)"
+    #bindsym $mod+F5 exec grim
+
+#
+# Layout stuff:
+#
+    # You can "split" the current object of your focus with
+    # $mod+b or $mod+v, for horizontal and vertical splits
+    # respectively.
+    bindsym $mod+b splith
+    bindsym $mod+x splitv
+
+    # Switch the current container between different layout styles
+    bindsym $mod+o layout stacking
+    bindsym $mod+period layout tabbed
+    bindsym $mod+comma layout toggle split
+
+    # Make the current focus fullscreen
+    bindsym $mod+u fullscreen
+
+    # Toggle the current focus between tiling and floating mode
+    bindsym $mod+$move+space floating toggle
+
+    # Swap focus between the tiling area and the floating area
+    #
+    bindsym $mod+space focus mode_toggle
+
+    # Move focus to the parent container
+    bindsym $mod+a focus parent
+#
+# Scratchpad: (NOT USED)
+#
+    # Sway has a "scratchpad", which is a bag of holding for windows.
+    # You can send windows there and get them back later.
+
+    # Move the currently focused window to the scratchpad
+    bindsym $mod+$move+minus move scratchpad
+
+    # Show the next scratchpad window or hide the focused scratchpad window.
+    # If there are multiple scratchpad windows, this command cycles through them.
+    bindsym $mod+minus scratchpad show
+
+#
+# Resizing containers:
+#
+mode "resize" {
+    # left will shrink the containers width
+    # right will grow the containers width
+    # up will shrink the containers height
+    # down will grow the containers height
+    bindsym $left resize shrink width 10px
+    bindsym $down resize grow height 10px
+    bindsym $up resize shrink height 10px
+    bindsym $right resize grow width 10px
+
+    # Ditto, with arrow keys
+    bindsym Left resize shrink width 10px
+    bindsym Down resize grow height 10px
+    bindsym Up resize shrink height 10px
+    bindsym Right resize grow width 10px
+
+    bindsym $mod+$move+minus scratchpad show
+
+    # Return to default mode
+    bindsym Return mode "default"
+    bindsym Escape mode "default"
+}
+
+bindsym $mod+Shift+r mode "resize"
+
+#bindsym $mod+r exec rwifi
+
+#bindsym $mod+Shift+n exec swaync-client -t -sw
+
+exec_always wl-paste -t text --watch clipman store
+exec_always wl-paste -p -t text --watch clipman store -P --histpath="~/.local/share/clipman-primary.json"
+
+exec_always blueman-applet
+
+exec_always swaync
+
+
+exec_always wireplumber
+
+exec_always keepassxc "/home/gavin/sync/passwords/Database.kdbx"
+
+exec solaar -w hide
+
+#exec_always /home/gavin/.scripts/s-wifi-setup
+
+bar {
+    swaybar_command waybar
+}

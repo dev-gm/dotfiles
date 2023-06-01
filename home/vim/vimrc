@@ -1,0 +1,52 @@
+set encoding=UTF-8
+syntax on
+filetype plugin indent on
+
+let mapleader = ' '
+let maplocalleader = ','
+set number
+set relativenumber
+set laststatus=2
+set nobackup
+set nowritebackup
+
+set tabstop=4
+set shiftwidth=4
+set autoindent
+set smartindent
+
+autocmd FileType * set noexpandtab
+autocmd FileType haskell set expandtab
+autocmd FileType python set expandtab
+
+inoremap jh <Esc>
+cnoremap jh <Esc>
+autocmd VimEnter * nnoremap ( $
+autocmd VimEnter * vnoremap ( $
+
+nnoremap <silent><C-Tab> gt
+
+nnoremap <silent><C-S-Tab> gT
+
+nnoremap <silent>/<CR> :noh<CR><CR>
+
+nnoremap <CR> :noh<CR><CR>
+
+nmap <S-Enter> O<Esc>
+nmap <CR> o<Esc>
+
+nnoremap > >>
+nnoremap < <<
+
+nnoremap * 0
+cnoremap * 0
+vnoremap * 0
+
+nnoremap 0 *
+cnoremap 0 *
+vnoremap 0 *
+
+set clipboard=unnamedplus
+set laststatus=2
+
+set mouse=a
