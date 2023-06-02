@@ -10,6 +10,7 @@
 			 (gnu packages terminals)
 			 (gnu packages networking)
 			 (gnu packages web-browsers)
+			 (gnu packages audio)
 			 (gnu packages pulseaudio)
 			 (gnu packages video)
 			 (gnu packages password-utils)
@@ -95,23 +96,25 @@
 	calibre
 	materia-theme
 	McMojave-cursors
-	bemenu))
+	bemenu
+	light
+	pulseaudio))
 
+(define %username "gavin")
+(define %email "github@gavinm.us")
+(define %name "Gavin Mason")
 (define %theme "Materia-dark-compact")
-
 (define %cursor "McMojave-cursors")
-
 (define %cursor-size 18)
-
 (define %font "Dejavu Sans 11")
-
 (define %dark-theme #t)
 
 (define %bash-profile
-"PATH=\"$PATH:/home/gavin/.local/bin/\"
+  (string-append
+"PATH=\"$PATH:/home/" %username "/.local/bin/\"
 if [[ -z $DISPLAY ]] && [[ $(tty) = /dev/tty1 ]]; then
-	exec sway
-fi")
+	exec dbus-run-session sway
+fi"))
 
 (define %bashrc "flashfetch")
 
@@ -132,7 +135,8 @@ fi")
 "gtk-theme-name=" %theme "
 gtk-cursor-theme-name=" %cursor "
 gtk-icon-theme-name=" %theme "
-gtk-font-name=\"" %font "\""))
+gtk-font-name=\"" %font "\"
+"))
 
 (define %gtk3-config
   (string-append
@@ -141,15 +145,32 @@ gtk-theme-name=" %theme "
 gtk-cursor-theme-name=" %cursor "
 gtk-cursor-theme-size=" (number->string %cursor-size) "
 gtk-icon-theme-name=" %theme "
-gtk-font-name=" %font "
-" (if %dark-theme
+gtk-font-name=" %font
+(if %dark-theme
 	"gtk-application-prefer-dark-theme=true"
-	"")))
+"") "
+"))
 
 (define %qt4-config
   (string-append
 "[Qt]
-style=" %theme))
+style=" %theme "
+"))
+
+(define %vim-plug-file
+  (origin
+	(uri "https://raw.githubusercontent.com/junegunn/vim-plug/master/plug.vim")
+	(method url-fetch)
+	(sha256
+	  (base32
+		"1vcx8cn8y9v5zrl63par0w22pv0kk3c7avpwc7ca77qsr2p0nz5r"))))
+
+(define %gitconfig-file
+  (string-append
+"[user]
+	email=" %email "
+	name=" %name "
+"))
 
 (define %xdg-config-files
   `(("sway/config" ,(local-file "sway/config"))
@@ -163,9 +184,9 @@ style=" %theme))
 	("Trolltech.conf" ,(plain-file "Trolltech.conf" %qt4-config))))
 
 (define %home-files
-  `((".local/share/nvim/site/autoload/plug.vim"
-	 ,(local-file "nvim/plug.vim"))
+  `((".local/share/nvim/site/autoload/plug.vim" ,%vim-plug-file)
 	(".vimrc" ,(local-file "vim/vimrc"))
+	(".gitconfig" ,(plain-file "gitconfig" %gitconfig-file))
 	(".gtkrc-2.0" ,(plain-file "gtkrc-2.0" %gtk2-config))))
 
 (define %services
@@ -175,25 +196,24 @@ style=" %theme))
 	       (guix-defaults? #t)
 	       (bash-profile (list (plain-file "bash-profile" %bash-profile)))
 		   (bashrc (list (plain-file "bashrc" %bashrc)))))
-	(service home-dbus-service-type)
 	(simple-service 'wayland-env-variables-service
 					home-environment-variables-service-type
 					%wayland-env-variables)
 	(simple-service 'qt5-theme-env-variable-service
 					home-environment-variables-service-type
 					%qt5-theme-env-variable)
-	(simple-service 'nonguix-channel-service
-					home-channels-service-type
-					(list
-					  (channel
-						(name 'nonguix)
-						(url "https://gitlab.com/nonguix/nonguix"))))
 	(simple-service 'xdg-config-files-service
 					home-xdg-configuration-files-service-type
 					%xdg-config-files)
 	(simple-service 'home-files-service
 					home-files-service-type
-					%home-files)))
+					%home-files)
+	(simple-service 'nonguix-channel-service
+					home-channels-service-type
+					(list
+					  (channel
+						(name 'nonguix)
+						(url "https://gitlab.com/nonguix/nonguix"))))))
 
 (home-environment
   (packages %packages)

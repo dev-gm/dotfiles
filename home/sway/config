@@ -65,16 +65,11 @@ input type:touchpad {
 xwayland enable
 
 set $refresh_i3status killall -SIGUSR1 i3status
-bindsym XF86AudioMute exec --no-startup-id pactl set-sink-mute @DEFAULT_SINK@ toggle && $refresh_i3status
-bindsym XF86AudioLowerVolume exec --no-startup-id pactl set-sink-volume @DEFAULT_SINK@ -5% && $refresh_i3status
-bindsym XF86AudioRaiseVolume exec --no-startup-id pactl set-sink-volume @DEFAULT_SINK@ +5% && $refresh_i3status
+bindsym XF86AudioMute exec --no-startup-id amixer -q sset Master toggle
+bindsym XF86AudioLowerVolume exec --no-startup-id pactl set-sink-volume 0 -5%
+bindsym XF86AudioRaiseVolume exec --no-startup-id pactl set-sink-volume 0 +5%
 bindsym XF86MonBrightnessDown exec --no-startup-id sudo light -U 5
 bindsym XF86MonBrightnessUp exec --no-startup-id sudo light -A 5
-#bindsym XF86AudioMedia exec --no-startup-id $lock
-#bindsym XF86RFKill exec --no-startup-id "/home/gavin/.scripts/toggle-bluetooth"
-#bindsym $mod+Shift+b exec --no-startup-id "sudo rfkill toggle 0"
-
-#exec_always --no-startup-id "sudo sv down bluetooth && sudo rfkill block 0"
 
 input type:keyboard {
     xkb_layout us
@@ -84,14 +79,10 @@ input type:keyboard {
 
 bindsym Alt_R+space input "FRMW0001:00 32AC:0006 Consumer Control" xkb_switch_layout next
 
-# exec_always ~/.config/sway/scripts/import-gsettings
-
 gaps outer 3
 gaps inner 10
 
 default_border pixel 3
-
-# for_window [class="."] border normal 1
 
 smart_borders on
 
@@ -118,15 +109,7 @@ smart_borders on
 	for_window [title="KeePassXC - Browser Access Request"] floating enable, sticky enable
 	for_window [app_id="Unlock Database - KeePassXC"] floating enable, sticky enable
 	for_window [title="Unlock Database - KeePassXC"] floating enable, sticky enable
-    #for_window [class="ksysguard"] floating enable
-    #for_window [class="ksysguard"] sticky enable
     for_window [app_id="mpv"] layout tabbed
-    #for_window [class="Wine"] floating enable
-    #for_window [app_id="retroarch"] fullscreen
-	#for_window [title="Picture-in-Picture"] border pixel 3
-	#for_window [app_id="firefox" title="^Picture-in-Picture$"] 
-
-	#bindsym $mod+F11 exec $lock
 
     # Start a terminal
     bindsym $mod+Return exec $term
@@ -207,10 +190,7 @@ smart_borders on
     bindsym $mod+m exec "mullvad-gui"
     bindsym $mod+v exec "pavucontrol"
 	bindsym $mod+Shift+s exec "Discord"
-    #bindsym $mod+g exec 'grimshot'
-	#bindsym $mod+z exec "firejail --apparmor --private=$HOME/.zoom zoom"
 	#bindsym $mod+r exec notify-send "Reconnected wifi" "$(.scripts/s-wifi-reload)"
-    #bindsym $mod+F5 exec grim
 
 #
 # Layout stuff:
@@ -279,9 +259,7 @@ mode "resize" {
 
 bindsym $mod+Shift+r mode "resize"
 
-#bindsym $mod+r exec rwifi
-
-#bindsym $mod+Shift+n exec swaync-client -t -sw
+bindsym $mod+Shift+n exec swaync-client -t -sw
 
 exec_always wl-paste -t text --watch clipman store
 exec_always wl-paste -p -t text --watch clipman store -P --histpath="~/.local/share/clipman-primary.json"
@@ -290,14 +268,11 @@ exec_always blueman-applet
 
 exec_always swaync
 
-
 exec_always wireplumber
 
 exec_always keepassxc "/home/gavin/sync/passwords/Database.kdbx"
 
 exec solaar -w hide
-
-#exec_always /home/gavin/.scripts/s-wifi-setup
 
 bar {
     swaybar_command waybar
