@@ -145,11 +145,10 @@ gtk-theme-name=" %theme "
 gtk-cursor-theme-name=" %cursor "
 gtk-cursor-theme-size=" (number->string %cursor-size) "
 gtk-icon-theme-name=" %theme "
-gtk-font-name=" %font
-(if %dark-theme
-	"gtk-application-prefer-dark-theme=true"
-"") "
-"))
+gtk-font-name=" %font "
+"(if %dark-theme
+	"gtk-application-prefer-dark-theme=true\n"
+	"")))
 
 (define %qt4-config
   (string-append
