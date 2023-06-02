@@ -83,16 +83,9 @@
 	},
 
 	"pulseaudio": {
-		"format": "{icon} {volume:2}%",
+		"format": "{volume:2}%",
 		"format-bluetooth": "{icon}  {volume}%",
 		"format-muted": "MUTE",
-		"format-icons": {
-			"headphones": "",
-			"default": [
-				"",
-				""
-			]
-		},
 		"scroll-step": 5,
 		"on-click": "pamixer -t",
 		"on-click-right": "pavucontrol"
@@ -154,6 +147,6 @@
 		"tooltip": false,
 		"interval": 5,
 		"format": "{}",
-		"exec": "/home/gavin/.local/bin/get-wattage.sh"
+		"exec": "/home/gavin/.local/bin/get-wattage"
 	}
 }

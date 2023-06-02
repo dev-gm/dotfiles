@@ -185,6 +185,8 @@ style=" %theme "
 
 (define %home-files
   `((".local/share/nvim/site/autoload/plug.vim" ,%vim-plug-file)
+	;(".local/bin/flashfetch" ,(local-file "bin/flashfetch"))
+	;(".local/bin/get-wattage" ,(local-file "bin/get-wattage"))
 	(".vimrc" ,(local-file "vim/vimrc"))
 	(".gitconfig" ,(plain-file "gitconfig" %gitconfig-file))
 	(".gtkrc-2.0" ,(plain-file "gtkrc-2.0" %gtk2-config))))
