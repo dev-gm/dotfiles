@@ -1,4 +1,5 @@
-(use-modules (gnu services)
+(use-modules (my packages)
+			 (gnu services)
 			 (gnu home)
 			 (gnu home services)
 			 (gnu home services shells)
@@ -36,69 +37,16 @@
 			 (guix gexp)
 			 (guix sets))
 
-(define McMojave-cursors
-  (package
-  	(name "McMojave-cursors")
-  	(build-system copy-build-system)
-  	(source (origin
-  	  		(uri (git-reference
-  	  			   (url "https://github.com/vinceliuice/McMojave-cursors.git")
-  	  			   (commit "7d0bfc1")))
-  	  		(method git-fetch)
-  	  		(sha256
-  	  		  (base32
-  	  			"0p8r7rpkgxa4jyv8mxkwyj04z93wr4w00nlzp3nbh0virawr52p1"))))
-  	(arguments `(#:install-plan '(("dist" "/share/icons/McMojave-cursors"))))
-  	(version "1.0")
-  	(synopsis "McMojave cursors")
-  	(description "McMojave cursors")
-  	(home-page "https://github.com/vinceliuice/McMojave-cursors")
-  	(license gpl3)))
-
 (define %packages
   (list font-microsoft-andale-mono
-	font-microsoft-arial
-	font-microsoft-arial-black
-	font-microsoft-courier-new
-	font-microsoft-georgia
-	font-microsoft-impact
-	font-microsoft-trebuchet-ms
-	font-microsoft-times-new-roman
-	font-microsoft-verdana
-	font-microsoft-webdings
-	font-google-noto-emoji
-	font-dejavu
-	font-adobe-source-code-pro
-	font-adobe-source-sans-pro
-	font-awesome
-	font-go
-	font-fira-code
-	swaynotificationcenter
-	alacritty
-	pipewire
-	wireplumber
-	blueman
-	swaylock
-	solaar
-	qutebrowser
-	firefox/wayland
-	steam
-	clipman
-	wl-clipboard
-	pavucontrol
-	sway
-	waybar
-	neovim
-	emacs
-	obs
-	keepassxc
-	grimshot
-	calibre
-	materia-theme
-	McMojave-cursors
-	bemenu
-	light
-	pulseaudio))
+	font-microsoft-arial font-microsoft-arial-black font-microsoft-courier-new
+	font-microsoft-georgia font-microsoft-impact font-microsoft-trebuchet-ms
+	font-microsoft-times-new-roman font-microsoft-verdana font-microsoft-webdings
+	font-google-noto-emoji font-dejavu font-adobe-source-code-pro font-adobe-source-sans-pro
+	font-awesome font-go font-fira-code swaynotificationcenter alacritty pipewire
+	wireplumber blueman swaylock solaar qutebrowser firefox/wayland steam clipman
+	wl-clipboard pavucontrol sway waybar neovim emacs obs keepassxc grimshot calibre
+	materia-theme McMojave-cursors bemenu light pulseaudio))
 
 (define %username "gavin")
 (define %email "github@gavinm.us")
@@ -209,12 +157,26 @@ style=" %theme "
 	(simple-service 'home-files-service
 					home-files-service-type
 					%home-files)
-	(simple-service 'nonguix-channel-service
+	(simple-service 'new-channels-service
 					home-channels-service-type
-					(list
-					  (channel
-						(name 'nonguix)
-						(url "https://gitlab.com/nonguix/nonguix"))))))
+					(append (list
+							  (channel
+								(name 'nonguix)
+								(url "https://gitlab.com/nonguix/nonguix.git")
+								(introduction
+								  (make-channel-introduction
+									"897c1a470da759236cc11798f4e0a5f7d4d59fbc"
+									(openpgp-fingerprint
+									  "2A39 3FFF 68F4 EF7A 3D29  12AF 6F51 20A0 22FB B2D5"))))
+							  (channel
+								(name 'guix-gaming-games)
+								(url "https://gitlab.com/guix-gaming-channels/games.git")
+								(introduction
+								  (make-channel-introduction
+									"c23d64f1b8cc086659f8781b27ab6c7314c5cca5"
+									(openpgp-fingerprint
+									  "50F3 3E2E 5B0C 3D90 0424  ABE8 9BDC F497 A4BB CC7F")))))
+							%default-channels))))
 
 (home-environment
   (packages %packages)
