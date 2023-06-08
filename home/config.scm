@@ -146,7 +146,7 @@ style=" %theme "
   `(("sway/config" ,(local-file "sway/config"))
 	("sway/blobs-d.svg" ,(local-file "sway/blobs-d.svg"))
 	;("emacs/init.el" ,(local-file "emacs/init.el"))
-	("nvim/init.vim" ,(local-file "nvim/init.vim"))
+	;("nvim/init.vim" ,(local-file "nvim/init.vim"))
 	("waybar/config" ,(local-file "waybar/config"))
 	("waybar/style.css" ,(local-file "waybar/style.css"))
 	("alacritty/alacritty.yml" ,(local-file "alacritty/alacritty.yml"))

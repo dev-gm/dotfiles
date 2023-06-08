@@ -79,6 +79,7 @@ Plug 'hrsh7th/cmp-path'
 Plug 'hrsh7th/cmp-nvim-lsp'
 Plug 'hrsh7th/cmp-nvim-lua'
 Plug 'hrsh7th/cmp-cmdline'
+Plug 'jcorbin/vim-lobster'
 call plug#end()
 
 " THEME
