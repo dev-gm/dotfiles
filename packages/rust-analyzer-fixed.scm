@@ -1,35 +1,12 @@
-(define-module (my packages)
-	#:use-module (guix git-download)
-	#:use-module (guix utils)
-	#:use-module (guix packages)
-	#:use-module (guix licenses)
-	#:use-module (guix build cargo-build-system)
-	#:use-module (guix build-system cargo)
-	#:use-module (gnu packages rust)
-	#:use-module (gnu packages crates-io)
-	#:use-module (gnu packages rust-apps)
-	#:declarative? #t
-	#:export (McMojave-cursors
-			  rust-analyzer-fixed))
-
-(define McMojave-cursors
-  (package
-	(name "McMojave-cursors")
-	(build-system copy-build-system)
-	(source (origin
-			  (uri (git-reference
-					 (url "https://github.com/vinceliuice/McMojave-cursors.git")
-					 (commit "7d0bfc1")))
-			  (method git-fetch)
-			  (sha256
-				(base32
-				  "0p8r7rpkgxa4jyv8mxkwyj04z93wr4w00nlzp3nbh0virawr52p1"))))
-	(arguments `(#:install-plan '(("dist" "/share/icons/McMojave-cursors"))))
-	(version "1.0")
-	(synopsis "McMojave cursors")
-	(description "McMojave cursors")
-	(home-page "https://github.com/vinceliuice/McMojave-cursors")
-	(license gpl3)))
+(use-modules (guix git-download)
+			 (guix utils)
+			 (guix packages)
+			 (guix licenses)
+			 (guix build cargo-build-system)
+			 (guix build-system cargo)
+			 (gnu packages rust)
+			 (gnu packages crates-io)
+			 (gnu packages rust-apps))
 
 (define rust-analyzer-fixed
   (package

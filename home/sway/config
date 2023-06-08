@@ -4,6 +4,7 @@
 set $mod Mod4
 
 exec --no-startup-id swaymsg "workspace 0"
+exec --no-startup-id sudo light -S 25
 
 # Home row direction keys, like vim
 set $left h
