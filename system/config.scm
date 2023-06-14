@@ -7,9 +7,7 @@
 			 (gnu services syncthing)
 			 (gnu services admin)
 			 (gnu services pm)
-			 ;(gnu packages cups)
 			 (gnu packages admin)
-			 ;(gnu packages freedesktop)
 			 (gnu packages certs)
 			 (gnu packages admin)
 			 (gnu packages nvi)
@@ -138,11 +136,6 @@ root ALL=(ALL) ALL
 								   (syncthing-configuration
 									 (user %primary-username)
 									 (arguments (list "--no-default-folder"))))
-						;  (service cups-service-type
-						;		   (cups-configuration
-						;			 (web-interface? #t)
-						;			 (extensions
-						;			   (list epson-inkjet-printer-escpr))))
 						  (service elogind-service-type
 								   (elogind-configuration
 									 (handle-lid-switch 'suspend)
@@ -159,20 +152,8 @@ root ALL=(ALL) ALL
 									 (cpu-max-perf-on-ac 100)
 									 (cpu-max-perf-on-bat 30)
 									 (cpu-boost-on-ac? #t)
-									 (cpu-boost-on-bat? #f)))
-						  (service greetd-service-type
-								   (greetd-configuration
-									 (terminals
-									   (list
-										 (greetd-terminal-configuration
-										   (terminal-vt "1")
-										   (terminal-switch #t)
-										   (default-session-user "gavin")
-										   (default-session-command
-											 (program-file "sway" #~(exit)))))))))
-					(modify-services %base-services
-									 (delete login-service-type)
-									 (delete mingetty-service-type))))
+									 (cpu-boost-on-bat? #f))))
+					%base-services))
 
 (operating-system
   (host-name "laptop.gavinm.us")

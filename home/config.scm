@@ -96,10 +96,13 @@
    `(("XDG_CURRENT_DESKTOP" . "sway")
 	 ;("XDG_RUNTIME_DIR" . "/run/user/1000")
 	 ("XDG_SESSION_TYPE" . "wayland")
+	 ("QT_SCALE_FACTOR" . "1")
+	 ("QT_QPA_PLATFORM" . "wayland")
+	 ("QT_WAYLAND_DISABLE_WINDOWDECORATION" . "1")
 	 ("MOZ_ENABLE_WAYLAND" . "1")
 	 ("ELM_ENGINE" . "wayland_egl")
 	 ("ECORE_EVAS_ENGINE" . "wayland-egl")
-	 ;("GDK_BACKEND" . "wayland")
+	 ("GDK_BACKEND" . "wayland")
 	 ("_JAVA_AWT_WM_NONREPARENTING" . "1")))
 
 (define %qt5-theme-env-variable
