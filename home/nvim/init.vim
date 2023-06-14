@@ -51,12 +51,6 @@ set laststatus=2
 
 set mouse=a
 
-" Install vim-plug if not found
-if empty(glob('~/.local/share/nvim/autoload/plug.vim'))
-  silent !curl -fLo ~/.local/share/nvim/autoload/plug.vim --create-dirs
-    \ https://raw.githubusercontent.com/junegunn/vim-plug/master/plug.vim
-endif
-
 " Run PlugInstall if there are missing plugins
 autocmd VimEnter * if len(filter(values(g:plugs), '!isdirectory(v:val.dir)'))
   \| PlugInstall --sync | source $MYVIMRC
@@ -67,6 +61,7 @@ Plug 'ayu-theme/ayu-vim'
 Plug 'tmsvg/pear-tree'
 Plug 'vim-airline/vim-airline'
 Plug 'vim-airline/vim-airline-themes'
+Plug 'nvim-treesitter/nvim-treesitter', {'do': ':TSUpdate'}
 Plug 'preservim/nerdtree'
 Plug 'lewis6991/gitsigns.nvim'
 Plug 'airblade/vim-gitgutter'
@@ -79,7 +74,10 @@ Plug 'hrsh7th/cmp-path'
 Plug 'hrsh7th/cmp-nvim-lsp'
 Plug 'hrsh7th/cmp-nvim-lua'
 Plug 'hrsh7th/cmp-cmdline'
-Plug 'jcorbin/vim-lobster'
+Plug 'zakuro9715/vim-vtools'
+Plug 'cheap-glitch/vim-v'
+Plug 'hrsh7th/vim-vsnip'
+Plug 'hrsh7th/vim-vsnip-integ'
 call plug#end()
 
 " THEME
@@ -89,11 +87,46 @@ if (has("termguicolors"))
 	colorscheme ayu
 endif
 
+let g:vfmt = 0
+let g:vtools_use_vls = 1
+
 set completeopt=menu,menuone,noselect
 
+" Expand
+"imap <expr> <C-j>   vsnip#expandable()  ? '<Plug>(vsnip-expand)'         : '<C-j>'
+"smap <expr> <C-j>   vsnip#expandable()  ? '<Plug>(vsnip-expand)'         : '<C-j>'
+
+" Expand or jump
+"imap <expr> <C-l>   vsnip#available(1)  ? '<Plug>(vsnip-expand-or-jump)' : '<C-l>'
+"smap <expr> <C-l>   vsnip#available(1)  ? '<Plug>(vsnip-expand-or-jump)' : '<C-l>'
+
+" Jump forward or backward
+imap <expr> <Tab>   vsnip#jumpable(1)   ? '<Plug>(vsnip-jump-next)'      : '<Tab>'
+smap <expr> <Tab>   vsnip#jumpable(1)   ? '<Plug>(vsnip-jump-next)'      : '<Tab>'
+imap <expr> <S-Tab> vsnip#jumpable(-1)  ? '<Plug>(vsnip-jump-prev)'      : '<S-Tab>'
+smap <expr> <S-Tab> vsnip#jumpable(-1)  ? '<Plug>(vsnip-jump-prev)'      : '<S-Tab>'
+
+" Select or cut text to use as $TM_SELECTED_TEXT in the next snippet.
+" See https://github.com/hrsh7th/vim-vsnip/pull/50
+"nmap        s   <Plug>(vsnip-select-text)
+"xmap        s   <Plug>(vsnip-select-text)
+"nmap        S   <Plug>(vsnip-cut-text)
+"xmap        S   <Plug>(vsnip-cut-text)
+
+" If you want to use snippet for multiple filetypes, you can `g:vsnip_filetypes` for it.
+let g:vsnip_filetypes = {}
+let g:vsnip_filetypes.javascriptreact = ['javascript']
+let g:vsnip_filetypes.typescriptreact = ['typescript']
+
 lua << EOF
-require'lspconfig'.clangd.setup{}
-require'lspconfig'.rust_analyzer.setup{}
+local capabilities = require('cmp_nvim_lsp').default_capabilities()
+
+local lspconfig = require('lspconfig')
+
+lspconfig.clangd.setup{ capabilities = capabilities }
+lspconfig.rust_analyzer.setup{ capabilities = capabilities }
+lspconfig.vls.setup{ capabilities = capabilities }
+lspconfig.ocamllsp.setup{ capabilities = capabilities }
 
 local cmp = require('cmp')
 local types = require('cmp.types')
@@ -155,6 +188,33 @@ cmp.setup.cmdline(':', {
 })
 
 require'auto-save'.setup{}
+
+require'nvim-treesitter.configs'.setup {
+	-- A list of parser names, or "all" (the five listed parsers should always be installed)
+	ensure_installed = { "c", "lua", "vim", "vimdoc", "query", "regex", "rust", "html", "v", "json", "java", "scheme", "cpp", "css", "javascript" },
+
+	-- Install parsers synchronously (only applied to `ensure_installed`)
+	sync_install = false,
+
+	-- Automatically install missing parsers when entering buffer
+	-- Recommendation: set to false if you don't have `tree-sitter` CLI installed locally
+	auto_install = false,
+
+	indent = {
+		enable = true
+	},
+
+	highlight = {
+		enable = true,
+
+		-- NOTE: these are the names of the parsers and not the filetype. (for example if you want to
+		-- disable highlighting for the `tex` filetype, you need to include `latex` in this list as this is
+		-- the name of the parser)
+		-- list of language that will be disabled
+		-- disable = { "c", "rust" },
+		additional_vim_regex_highlighting = false
+	}
+}
 EOF
 
 " NERDTREE
@@ -181,7 +241,7 @@ tnoremap jh <C-\><C-n>
 au BufEnter * if &buftype == 'terminal' | :startinsert | endif
 
 function! OpenTerminal()
-    split term://bash
+    split term://fish
     resize10
 endfunction
 

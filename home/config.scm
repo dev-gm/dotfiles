@@ -1,4 +1,4 @@
-(add-to-load-path (canonicalize-path (string-append (dirname (current-filename)) "/..")))
+;(add-to-load-path (canonicalize-path (string-append (dirname (current-filename)) "/..")))
 
 (define-module (home config)
 	#:use-module (gnu services)
@@ -37,8 +37,20 @@
 	#:use-module (guix download)
 	#:use-module (guix gexp)
 	#:use-module (guix sets)
-	#:export (%username %email %name %theme
-			  %cursor %cursor-size %font %dark-theme))
+	#:use-module (guix inferior)
+	#:use-module (srfi srfi-1)
+	#:export (%username %email %name %theme %cursor
+			  %cursor-size %font %dark-theme %opam-feature))
+
+(define %username "gavin")
+(define %email "github@gavinm.us")
+(define %name "Gavin Mason")
+(define %theme "Materia-dark-compact")
+(define %cursor "McMojave-cursors")
+(define %cursor-size 18)
+(define %font "Dejavu Sans 11")
+(define %dark-theme #t)
+(define %opam-feature #t)
 
 (define McMojave-cursors
   (package
@@ -68,35 +80,27 @@
 		grimshot clipman wl-clipboard light solaar
 		blueman wireplumber pipewire pulseaudio
 		pavucontrol alacritty neovim emacs
-		qutebrowser firefox/wayland steam
+		steam qutebrowser ;firefox/wayland
 		keepassxc calibre obs))
-
-(define %username "gavin")
-(define %email "github@gavinm.us")
-(define %name "Gavin Mason")
-(define %theme "Materia-dark-compact")
-(define %cursor "McMojave-cursors")
-(define %cursor-size 18)
-(define %font "Dejavu Sans 11")
-(define %dark-theme #t)
 
 (define %bash-profile
   (string-append
-"PATH=\"$PATH:/home/" %username "/.local/bin/\"
-if [[ -z $DISPLAY ]] && [[ $(tty) = /dev/tty1 ]]; then
-	exec dbus-run-session sway
-fi"))
+(if %opam-feature
+  "eval $(opam env)\n"
+  "")
+"export PATH=\"$PATH:/home/" %username "/.local/bin/\""))
 
 (define %bashrc "flashfetch")
 
 (define %wayland-env-variables
    `(("XDG_CURRENT_DESKTOP" . "sway")
- 	("XDG_SESSION_TYPE" . "wayland")
- 	("MOZ_ENABLE_WAYLAND" . "1")
- 	("ELM_ENGINE" . "wayland_egl")
- 	("ECORE_EVAS_ENGINE" . "wayland-egl")
- 	;("GDK_BACKEND" . "wayland")
- 	("_JAVA_AWT_WM_NONREPARENTING" . "1")))
+	 ;("XDG_RUNTIME_DIR" . "/run/user/1000")
+	 ("XDG_SESSION_TYPE" . "wayland")
+	 ("MOZ_ENABLE_WAYLAND" . "1")
+	 ("ELM_ENGINE" . "wayland_egl")
+	 ("ECORE_EVAS_ENGINE" . "wayland-egl")
+	 ;("GDK_BACKEND" . "wayland")
+	 ("_JAVA_AWT_WM_NONREPARENTING" . "1")))
 
 (define %qt5-theme-env-variable
   `(("QT_STYLE_OVERRIDE" . ,%theme)))
@@ -146,7 +150,7 @@ style=" %theme "
   `(("sway/config" ,(local-file "sway/config"))
 	("sway/blobs-d.svg" ,(local-file "sway/blobs-d.svg"))
 	;("emacs/init.el" ,(local-file "emacs/init.el"))
-	;("nvim/init.vim" ,(local-file "nvim/init.vim"))
+	("nvim/init.vim" ,(local-file "nvim/init.vim"))
 	("waybar/config" ,(local-file "waybar/config"))
 	("waybar/style.css" ,(local-file "waybar/style.css"))
 	("alacritty/alacritty.yml" ,(local-file "alacritty/alacritty.yml"))

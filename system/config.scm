@@ -7,19 +7,20 @@
 			 (gnu services syncthing)
 			 (gnu services admin)
 			 (gnu services pm)
-			 (gnu packages cups)
-			 (gnu packages fonts)
+			 ;(gnu packages cups)
 			 (gnu packages admin)
-			 (gnu packages freedesktop)
-			 (gnu packages audio)
-			 (gnu packages base)
+			 ;(gnu packages freedesktop)
 			 (gnu packages certs)
 			 (gnu packages admin)
-			 (gnu packages vim)
+			 (gnu packages nvi)
+			 (gnu packages gl)
+			 (gnu packages vulkan)
 			 (gnu packages linux)
+			 (gnu packages base)
 			 (gnu system keyboard)
 			 (gnu system mapped-devices)
 			 (gnu system file-systems)
+			 (gnu system linux-initrd)
 			 (gnu bootloader)
 			 (gnu bootloader grub)
 			 (guix gexp)
@@ -53,10 +54,16 @@
 					  (targets '("/boot/efi"))
 					  (keyboard-layout %keyboard-layout)))
 
+(define %initrd (lambda (file-systems . rest)
+				  (apply microcode-initrd file-systems
+						 #:initrd base-initrd
+						 #:microcode-packages (list intel-microcode)
+						 rest)))
+
 (define %firmware (append
-					(list iwlwifi-firmware
-						  i915-firmware
-						  bluez-firmware)
+					(list i915-firmware
+						  iwlwifi-firmware
+						  ibt-hw-firmware)
 					%base-firmware))
 
 (define %mapped-devices
@@ -84,8 +91,7 @@
 					   (group %primary-username)
 					   (supplementary-groups '("wheel" "audio" "video"
 											   "netdev" "network" "dialout"
-											   "audio" "kvm" "video"
-											   "adbusers" "scanner")))
+											   "audio" "kvm" "video" "adbusers")))
 					 %base-user-accounts))
 
 (define %groups (append (list (user-group
@@ -94,9 +100,7 @@
 							  (user-group
 								(name "network"))
 							  (user-group
-								(name "adbusers"))
-							  (user-group
-								(name "scanner")))
+								(name "adbusers")))
 						%base-groups))
 
 (define %sudoers-file
@@ -115,11 +119,11 @@ root ALL=(ALL) ALL
 						  "0na31fzvm5jh2c1rh260ghq61fsaqdfqmi0n7nbhjzpmcd23wx6z"))))
 
 (define %packages (append
-					(list intel-media-driver wpa-supplicant
-						  nss-certs vim bluez bluez-alsa)
+					(list mesa vulkan-loader intel-media-driver
+						  wpa-supplicant nss-certs nvi bluez fwupd-nonfree)
 					%base-packages))
 
-(define %nftables-ruleset %default-nftables-ruleset)
+(define %nftables-ruleset %default-nftables-ruleset) ;(plain-file "nftables.conf" ""))
 
 (define %services (append
 					(list (service wpa-supplicant-service-type)
@@ -134,13 +138,16 @@ root ALL=(ALL) ALL
 								   (syncthing-configuration
 									 (user %primary-username)
 									 (arguments (list "--no-default-folder"))))
-						  (service cups-service-type
-								   (cups-configuration
-									 (web-interface? #t)
-									 (extensions
-									   (list epson-inkjet-printer-escpr))))
+						;  (service cups-service-type
+						;		   (cups-configuration
+						;			 (web-interface? #t)
+						;			 (extensions
+						;			   (list epson-inkjet-printer-escpr))))
 						  (service elogind-service-type
-								   (elogind-configuration))
+								   (elogind-configuration
+									 (handle-lid-switch 'suspend)
+									 (handle-lid-switch-docked 'ignore)
+									 (handle-lid-switch-external-power 'ignore)))
 						  (service bluetooth-service-type
 								   (bluetooth-configuration
 									 (name "Laptop")))
@@ -152,8 +159,20 @@ root ALL=(ALL) ALL
 									 (cpu-max-perf-on-ac 100)
 									 (cpu-max-perf-on-bat 30)
 									 (cpu-boost-on-ac? #t)
-									 (cpu-boost-on-bat? #f))))
-					%base-services))
+									 (cpu-boost-on-bat? #f)))
+						  (service greetd-service-type
+								   (greetd-configuration
+									 (terminals
+									   (list
+										 (greetd-terminal-configuration
+										   (terminal-vt "1")
+										   (terminal-switch #t)
+										   (default-session-user "gavin")
+										   (default-session-command
+											 (program-file "sway" #~(exit)))))))))
+					(modify-services %base-services
+									 (delete login-service-type)
+									 (delete mingetty-service-type))))
 
 (operating-system
   (host-name "laptop.gavinm.us")
@@ -169,7 +188,7 @@ root ALL=(ALL) ALL
   (kernel linux)
   (kernel-arguments %kernel-arguments)
   (bootloader %bootloader)
-  (initrd microcode-initrd)
+  (initrd %initrd)
   (firmware %firmware)
 
   (mapped-devices %mapped-devices)

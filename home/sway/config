@@ -180,9 +180,9 @@ smart_borders on
     # We just use 1-10 as the default.
 
     # Applications:
-    bindsym $mod+i exec "firefox"
+    bindsym $mod+i exec "qutebrowser"
 	bindsym $mod+g exec "emacs"
-    bindsym $mod+t exec "firefox --new-tab https://classroom.google.com/"
+    bindsym $mod+t exec "qutebrowser https://classroom.google.com/"
     bindsym $mod+n exec "torbrowser-launcher"
     bindsym $mod+d exec "lutris"
     bindsym $mod+p exec "qutebrowser"
