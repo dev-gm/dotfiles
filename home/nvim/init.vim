@@ -51,6 +51,8 @@ set laststatus=2
 
 set mouse=a
 
+set rtp^="/home/gavin/.opam/default/share/ocp-indent/vim"
+
 " Run PlugInstall if there are missing plugins
 autocmd VimEnter * if len(filter(values(g:plugs), '!isdirectory(v:val.dir)'))
   \| PlugInstall --sync | source $MYVIMRC

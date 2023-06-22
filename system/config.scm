@@ -1,20 +1,4 @@
-(use-modules (gnu services base)
-			 (gnu services networking)
-			 (gnu services cups)
-			 (gnu services dbus)
-			 (gnu services authentication)
-			 (gnu services desktop)
-			 (gnu services syncthing)
-			 (gnu services admin)
-			 (gnu services pm)
-			 (gnu packages admin)
-			 (gnu packages certs)
-			 (gnu packages admin)
-			 (gnu packages nvi)
-			 (gnu packages gl)
-			 (gnu packages vulkan)
-			 (gnu packages linux)
-			 (gnu packages base)
+(use-modules (gnu)
 			 (gnu system keyboard)
 			 (gnu system mapped-devices)
 			 (gnu system file-systems)
@@ -22,13 +6,20 @@
 			 (gnu bootloader)
 			 (gnu bootloader grub)
 			 (guix gexp)
+			 (guix channels)
+			 (guix inferior)
 			 (guix download)
 			 (guix packages)
 			 (nongnu packages firmware)
 			 (nongnu packages fonts)
 			 (nongnu packages video)
 			 (nongnu packages linux)
-			 (nongnu system linux-initrd))
+			 (nongnu system linux-initrd)
+			 (srfi srfi-1))
+
+(use-service-modules base networking cups dbus authentication virtualization desktop syncthing admin pm)
+
+(use-package-modules base linux admin certs nvi gl vulkan video)
 
 (define %keyboard-layout (keyboard-layout "us" "dvp"
 										  #:options
@@ -38,6 +29,23 @@
 											"kpdl:semi"
 											"keypad:atm"
 											"caps:super")))
+
+(define %kernel
+  (let*
+	((channels
+	   (list (channel
+			   (name 'nonguix)
+			   (url "https://gitlab.com/nonguix/nonguix")
+			   (branch "master")
+			   (commit "69b05a57eed16218d607a90d7bc49ba79a2d850e"))
+			 (channel
+			   (name 'guix)
+			   (url "https://git.savannah.gnu.org/git/guix.git")
+			   (branch "master")
+			   (commit "2e0228e736bf08d376ffbce6b5c4f899babfee5e"))))
+	 (inferior
+	   (inferior-for-channels channels)))
+	(first (lookup-inferior-packages inferior "linux"))))
 
 (define %kernel-arguments
   (list
@@ -87,9 +95,9 @@
 (define %users (cons (user-account
 					   (name %primary-username)
 					   (group %primary-username)
-					   (supplementary-groups '("wheel" "audio" "video"
-											   "netdev" "network" "dialout"
-											   "audio" "kvm" "video" "adbusers")))
+					   (supplementary-groups '("wheel" "audio" "video" "netdev"
+											   "network" "dialout" "kvm"
+											   "audio" "video" "adbusers")))
 					 %base-user-accounts))
 
 (define %groups (append (list (user-group
@@ -117,7 +125,7 @@ root ALL=(ALL) ALL
 						  "0na31fzvm5jh2c1rh260ghq61fsaqdfqmi0n7nbhjzpmcd23wx6z"))))
 
 (define %packages (append
-					(list mesa vulkan-loader intel-media-driver
+					(list mesa vulkan-loader intel-media-driver intel-vaapi-driver libva
 						  wpa-supplicant nss-certs nvi bluez fwupd-nonfree)
 					%base-packages))
 
@@ -153,7 +161,16 @@ root ALL=(ALL) ALL
 									 (cpu-max-perf-on-bat 30)
 									 (cpu-boost-on-ac? #t)
 									 (cpu-boost-on-bat? #f))))
-					%base-services))
+					(modify-services %base-services
+									 (guix-service-type config =>
+														(guix-configuration
+														  (inherit config)
+														  (substitute-urls
+															(append (list "https://substitutes.nonguix.org")
+																	%default-substitute-urls))
+														  (authorized-keys
+															(append (list (local-file "nonguix-signing-key.pub"))
+																	%default-authorized-guix-keys)))))))
 
 (operating-system
   (host-name "laptop.gavinm.us")
@@ -166,7 +183,7 @@ root ALL=(ALL) ALL
   (sudoers-file %sudoers-file)
   (hosts-file %hosts-file)
 
-  (kernel linux)
+  (kernel %kernel)
   (kernel-arguments %kernel-arguments)
   (bootloader %bootloader)
   (initrd %initrd)

@@ -1,46 +1,30 @@
-;(add-to-load-path (canonicalize-path (string-append (dirname (current-filename)) "/..")))
+(use-modules (gnu)
+			 (gnu services)
+			 (gnu home)
+			 (gnu home services)
+			 (gnu home services shells)
+			 (gnu home services desktop)
+			 (gnu home services guix)
+			 (nongnu packages mozilla)
+			 (nongnu packages steam-client)
+			 (nongnu packages fonts)
+			 (guix build-system copy)
+			 (guix build copy-build-system)
+			 (guix utils)
+			 (guix packages)
+			 (guix channels)
+			 (guix licenses)
+			 (guix git-download)
+			 (guix download)
+			 (guix gexp)
+			 (guix sets)
+			 (guix inferior)
+			 (srfi srfi-1))
 
-(define-module (home config)
-	#:use-module (gnu services)
-	#:use-module (gnu home)
-	#:use-module (gnu home services)
-	#:use-module (gnu home services shells)
-	#:use-module (gnu home services desktop)
-	#:use-module (gnu home services guix)
-	#:use-module (gnu packages wm)
-	#:use-module (gnu packages admin)
-	#:use-module (gnu packages xdisorg)
-	#:use-module (gnu packages terminals)
-	#:use-module (gnu packages networking)
-	#:use-module (gnu packages web-browsers)
-	#:use-module (gnu packages audio)
-	#:use-module (gnu packages pulseaudio)
-	#:use-module (gnu packages video)
-	#:use-module (gnu packages password-utils)
-	#:use-module (gnu packages pciutils)
-	#:use-module (gnu packages fonts)
-	#:use-module (gnu packages ebook)
-	#:use-module (gnu packages vim)
-	#:use-module (gnu packages emacs)
-	#:use-module (gnu packages gnome-xyz)
-	#:use-module (gnu packages linux)
-	#:use-module (nongnu packages mozilla)
-	#:use-module (nongnu packages steam-client)
-	#:use-module (nongnu packages fonts)
-	#:use-module (guix build-system copy)
-	#:use-module (guix build copy-build-system)
-	#:use-module (guix utils)
-	#:use-module (guix packages)
-	#:use-module (guix channels)
-	#:use-module (guix licenses)
-	#:use-module (guix git-download)
-	#:use-module (guix download)
-	#:use-module (guix gexp)
-	#:use-module (guix sets)
-	#:use-module (guix inferior)
-	#:use-module (srfi srfi-1)
-	#:export (%username %email %name %theme %cursor
-			  %cursor-size %font %dark-theme %opam-feature))
+(use-package-modules wm admin xdisorg terminals networking
+					 chromium audio pulseaudio video
+					 password-utils pciutils fonts ebook vim
+					 emacs gnome-xyz xorg qt linux)
 
 (define %username "gavin")
 (define %email "github@gavinm.us")
@@ -71,16 +55,34 @@
 	(home-page "https://github.com/vinceliuice/McMojave-cursors")
 	(license gpl3)))
 
+;(define firefox/wayland-112.0.2
+;  (let*
+;	((channels
+;	   (list (channel
+;			   (name 'nonguix)
+;			   (url "https://gitlab.com/nonguix/nonguix")
+;			   (branch "master")
+;			   (commit "80e245c64551e16cf4472bca08bb444f97b336c0"))
+;			 (channel
+;			   (name 'guix)
+;			   (url "https://git.savannah.gnu.org/git/guix.git")
+;			   (branch "master")
+;			   (commit "0a164b344d6dabb0dc38f61cc2f4868fa15dec63"))))
+;	 (inferior
+;	   (inferior-for-channels channels)))
+;	(first (lookup-inferior-packages inferior "firefox-wayland"))))
+
 (define %packages
   (list font-adobe-source-code-pro font-adobe-source-sans-pro
 		font-awesome font-dejavu font-fira-code font-go
 		font-google-noto-emoji font-microsoft-web-core-fonts
 		McMojave-cursors materia-theme
 		sway bemenu waybar swaylock swaynotificationcenter
+		xorg-server-xwayland qtwayland
 		grimshot clipman wl-clipboard light solaar
-		blueman wireplumber pipewire pulseaudio
-		pavucontrol alacritty neovim emacs
-		steam qutebrowser ;firefox/wayland
+		blueman wireplumber pipewire pulseaudio pavucontrol
+		alacritty neovim emacs
+		steam ungoogled-chromium
 		keepassxc calibre obs))
 
 (define %bash-profile
@@ -88,7 +90,10 @@
 (if %opam-feature
   "eval $(opam env)\n"
   "")
-"export PATH=\"$PATH:/home/" %username "/.local/bin/\""))
+"export PATH=\"$PATH:/home/" %username "/.local/bin/\"
+if [ \"$(tty)\" = \"/dev/tty1\" ]; then
+	dbus-run-session sway
+fi"))
 
 (define %bashrc "flashfetch")
 
@@ -97,7 +102,7 @@
 	 ;("XDG_RUNTIME_DIR" . "/run/user/1000")
 	 ("XDG_SESSION_TYPE" . "wayland")
 	 ("QT_SCALE_FACTOR" . "1")
-	 ("QT_QPA_PLATFORM" . "wayland")
+	 ;("QT_QPA_PLATFORM" . "wayland")
 	 ("QT_WAYLAND_DISABLE_WINDOWDECORATION" . "1")
 	 ("MOZ_ENABLE_WAYLAND" . "1")
 	 ("ELM_ENGINE" . "wayland_egl")
@@ -147,6 +152,8 @@ style=" %theme "
 "[user]
 	email=" %email "
 	name=" %name "
+[init]
+	defaultBranch=main
 "))
 
 (define %xdg-config-files

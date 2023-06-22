@@ -50,3 +50,5 @@ set clipboard=unnamedplus
 set laststatus=2
 
 set mouse=a
+
+ set rtp^="/home/gavin/.opam/default/share/ocp-indent/vim"
