@@ -102,7 +102,7 @@ fi"))
 	 ;("XDG_RUNTIME_DIR" . "/run/user/1000")
 	 ("XDG_SESSION_TYPE" . "wayland")
 	 ("QT_SCALE_FACTOR" . "1")
-	 ;("QT_QPA_PLATFORM" . "wayland")
+	 ("QT_QPA_PLATFORM" . "wayland")
 	 ("QT_WAYLAND_DISABLE_WINDOWDECORATION" . "1")
 	 ("MOZ_ENABLE_WAYLAND" . "1")
 	 ("ELM_ENGINE" . "wayland_egl")
@@ -115,20 +115,20 @@ fi"))
 
 (define %gtk2-config
   (string-append
-"gtk-theme-name=" %theme "
-gtk-cursor-theme-name=" %cursor "
-gtk-icon-theme-name=" %theme "
+"gtk-theme-name=\"" %theme "\"
+gtk-cursor-theme-name=\"" %cursor "\"
+gtk-icon-theme-name=\"" %theme "\"
 gtk-font-name=\"" %font "\"
 "))
 
 (define %gtk3-config
   (string-append
 "[Settings]
-gtk-theme-name=" %theme "
-gtk-cursor-theme-name=" %cursor "
+gtk-theme-name=\"" %theme "\"
+gtk-cursor-theme-name=\"" %cursor "\"
 gtk-cursor-theme-size=" (number->string %cursor-size) "
-gtk-icon-theme-name=" %theme "
-gtk-font-name=" %font "
+gtk-icon-theme-name=\"" %theme "\"
+gtk-font-name=\"" %font "\"
 "(if %dark-theme
 	"gtk-application-prefer-dark-theme=true\n"
 	"")))
