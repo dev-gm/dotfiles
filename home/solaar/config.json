@@ -1,0 +1,14 @@
+{
+  "4074:993FC6DD": {
+    "_modelId": "407400000000",
+    "_name": "G305 Lightspeed Wireless Gaming Mouse",
+    "_sensitive": {
+      "dpi": false
+    },
+    "_serial": "993FC6DD",
+    "_unitId": "42DB462F",
+    "dpi": "200",
+    "report_rate": 1
+  },
+  "_version": "1.0.7"
+}

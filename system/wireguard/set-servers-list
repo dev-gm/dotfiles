@@ -1,0 +1,1 @@
+echo -n "$(echo -n "(" && for f in /etc/wireguard/servers/:/*.conf; do echo -n " " && echo -n "(\"" && cat "$f" | grep Endpoint | cut -d' ' -f3 | tr -d '\n' && echo -n "\" \"" && cat "$f" | grep PublicKey | cut -d' ' -f3 | tr -d '\n' && echo -n "\")"; done && echo -n ")")" > /etc/wireguard/servers-list && chmod 600 /etc/wireguard/servers-list

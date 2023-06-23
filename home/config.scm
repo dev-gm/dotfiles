@@ -165,7 +165,8 @@ style=" %theme "
 	("waybar/style.css" ,(local-file "waybar/style.css"))
 	("alacritty/alacritty.yml" ,(local-file "alacritty/alacritty.yml"))
 	("gtk-3.0/settings.ini" ,(plain-file "settings.ini" %gtk3-config))
-	("Trolltech.conf" ,(plain-file "Trolltech.conf" %qt4-config))))
+	("Trolltech.conf" ,(plain-file "Trolltech.conf" %qt4-config))
+	("solaar/config.json" ,(local-file "solaar/config.json"))))
 
 (define %home-files
   `((".local/share/nvim/site/autoload/plug.vim" ,%vim-plug-file)

@@ -15,11 +15,14 @@
 			 (nongnu packages video)
 			 (nongnu packages linux)
 			 (nongnu system linux-initrd)
+			 (ice-9 textual-ports)
 			 (srfi srfi-1))
 
-(use-service-modules base networking cups dbus authentication virtualization desktop syncthing admin pm)
+(use-service-modules base networking cups dbus authentication virtualization desktop syncthing admin pm vpn)
 
-(use-package-modules base linux admin certs nvi gl vulkan video)
+(use-package-modules base linux admin certs nvi gl vulkan video vpn)
+
+(set! *random-state* (random-state-from-platform))
 
 (define %keyboard-layout (keyboard-layout "us" "dvp"
 										  #:options
@@ -125,19 +128,88 @@ root ALL=(ALL) ALL
 						  "0na31fzvm5jh2c1rh260ghq61fsaqdfqmi0n7nbhjzpmcd23wx6z"))))
 
 (define %packages (append
-					(list mesa vulkan-loader intel-media-driver intel-vaapi-driver libva
-						  wpa-supplicant nss-certs nvi bluez fwupd-nonfree)
+					(list mesa vulkan-loader intel-media-driver intel-vaapi-driver libva wpa-supplicant
+						  nss-certs nvi bluez fwupd-nonfree wireguard-tools iptables)
 					%base-packages))
 
-(define %nftables-ruleset %default-nftables-ruleset) ;(plain-file "nftables.conf" ""))
+(define %iptables-rules
+  (plain-file "iptables.rules"
+			  "*filter
+:INPUT DROP
+:FORWARD ACCEPT
+:OUTPUT ACCEPT
+-A INPUT -i lo -j ACCEPT
+-A INPUT -m conntrack --ctstate ESTABLISHED,RELATED -j ACCEPT
+COMMIT
+"))
+
+(define %ip6tables-rules
+  (plain-file "ip6tables.rules"
+			  "*filter
+:INPUT DROP
+:FORWARD ACCEPT
+:OUTPUT ACCEPT
+-A INPUT -i lo -j ACCEPT
+-A INPUT -m conntrack --ctstate ESTABLISHED,RELATED -j ACCEPT
+COMMIT
+"))
+
+; /etc/wireguard must contain:
+;	private.key
+;	servers/$(%mullvad-server-type)/*.conf
+
+(define %mullvad-server-type "us-nyc")
+
+(define (make-mullvad-wireguard-configuration endpoint public-key)
+  (wireguard-configuration
+	(addresses '("10.67.231.28/32" "fc00:bbbb:bbbb:bb01::4:e71b/128"))
+	(dns '("100.64.0.7"))
+	(private-key "/etc/wireguard/private.key")
+	(post-up '("iptables -I OUTPUT ! -o %i -m mark ! --mark $(wg show %i fwmark) -m addrtype ! --dst-type LOCAL -j REJECT" "ip6tables -I OUTPUT ! -o %i -m mark ! --mark $(wg show %i fwmark) -m addrtype ! --dst-type LOCAL -j REJECT"))
+	(pre-down '("iptables -D OUTPUT ! -o %i -m mark ! --mark $(wg show %i fwmark) -m addrtype ! --dst-type LOCAL -j REJECT" "ip6tables -D OUTPUT ! -o %i -m mark ! --mark $(wg show %i fwmark) -m addrtype ! --dst-type LOCAL -j REJECT"))
+	(peers
+	  (list
+		(wireguard-peer
+		  (name "mullvad-server")
+		  (public-key public-key)
+		  (allowed-ips '("0.0.0.0/0" "::0/0"))
+		  (endpoint endpoint))))))
+
+
+(define %wireguard-configuration
+  (begin
+	(system (string-join
+			  (string-split
+				(call-with-input-file
+				  "wireguard/set-servers-list"
+				  get-string-all) #\:)
+			  %mullvad-server-type))
+	(let* ((servers (read (open-input-file "/etc/wireguard/servers-list")))
+		   (server (list-ref servers (random (length servers))))
+		   (endpoint (first server))
+		   (public-key (second server)))
+	  (make-mullvad-wireguard-configuration endpoint public-key))))
+
+(define %solaar-udev-rules
+  (file->udev-rule
+	"42-logitech-unify-permissions.rules"
+	(origin
+	  (method url-fetch)
+	  (uri "https://raw.githubusercontent.com/pwr-Solaar/Solaar/master/rules.d/42-logitech-unify-permissions.rules")
+	  (sha256
+		(base32
+		  "1j2hizasd9303783ay7n2aymx12l3kk2jijcmn4dwczlk900h4ci")))))
 
 (define %services (append
 					(list (service wpa-supplicant-service-type)
 						  (service network-manager-service-type
 								   (network-manager-configuration))
-						  (service nftables-service-type
-								   (nftables-configuration
-									 (ruleset %nftables-ruleset)))
+						  (service iptables-service-type
+								   (iptables-configuration
+									 (ipv4-rules %iptables-rules)
+									 (ipv6-rules %ip6tables-rules)))
+						  (service wireguard-service-type
+								   %wireguard-configuration)
 						  (service openntpd-service-type
 								   (openntpd-configuration))
 						  (service syncthing-service-type
@@ -158,9 +230,10 @@ root ALL=(ALL) ALL
 									 (cpu-scaling-governor-on-ac (list "performance"))
 									 (cpu-scaling-governor-on-bat (list "powersave"))
 									 (cpu-max-perf-on-ac 100)
-									 (cpu-max-perf-on-bat 30)
+									 (cpu-max-perf-on-bat 25)
 									 (cpu-boost-on-ac? #t)
-									 (cpu-boost-on-bat? #f))))
+									 (cpu-boost-on-bat? #f)))
+						  (udev-rules-service 'solaar %solaar-udev-rules))
 					(modify-services %base-services
 									 (guix-service-type config =>
 														(guix-configuration
