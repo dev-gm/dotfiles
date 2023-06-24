@@ -156,7 +156,7 @@ COMMIT
 
 ; /etc/wireguard must contain:
 ;	private.key
-;	servers/$(%mullvad-server-type)/*.conf
+;	servers/$(%mullvad-server-type)-wg-*.conf
 
 (define %mullvad-server-type "us-nyc")
 
