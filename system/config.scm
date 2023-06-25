@@ -154,27 +154,34 @@ COMMIT
 COMMIT
 "))
 
-; /etc/wireguard must contain:
-;	private.key
-;	servers/$(%mullvad-server-type)*.conf
+; /etc/wireguard/servers must contain all mullvad wireguard config files
 
-(define %mullvad-server-type "il") ; israel
+(define %mullvad-server-type "sg-sin") ; singapore
 
-(define (make-mullvad-wireguard-configuration addresses endpoint public-key)
+(define %mullvad-dns "100.64.0.7")
+
+(define %mullvad-kill-switch #t)
+
+(define (make-mullvad-wireguard-configuration name addresses endpoint public-key kill-switch)
   (wireguard-configuration
-	(addresses (string-split addresses #\,))
-	(dns '("100.64.0.7"))
+	(addresses addresses)
+	(dns (list %mullvad-dns))
 	(private-key "/etc/wireguard/private.key")
-	(post-up '("iptables -I OUTPUT ! -o %i -m mark ! --mark $(wg show %i fwmark) -m addrtype ! --dst-type LOCAL -j REJECT" "ip6tables -I OUTPUT ! -o %i -m mark ! --mark $(wg show %i fwmark) -m addrtype ! --dst-type LOCAL -j REJECT"))
-	(pre-down '("iptables -D OUTPUT ! -o %i -m mark ! --mark $(wg show %i fwmark) -m addrtype ! --dst-type LOCAL -j REJECT" "ip6tables -D OUTPUT ! -o %i -m mark ! --mark $(wg show %i fwmark) -m addrtype ! --dst-type LOCAL -j REJECT"))
+	(post-up (if kill-switch
+			   '("iptables -I OUTPUT ! -o %i -m mark ! --mark $(wg show %i fwmark) -m addrtype ! --dst-type LOCAL -j REJECT"
+				 "ip6tables -I OUTPUT ! -o %i -m mark ! --mark $(wg show %i fwmark) -m addrtype ! --dst-type LOCAL -j REJECT")
+			   '()))
+	(pre-down (if kill-switch
+				'("iptables -D OUTPUT ! -o %i -m mark ! --mark $(wg show %i fwmark) -m addrtype ! --dst-type LOCAL -j REJECT"
+				  "ip6tables -D OUTPUT ! -o %i -m mark ! --mark $(wg show %i fwmark) -m addrtype ! --dst-type LOCAL -j REJECT")
+				'()))
 	(peers
 	  (list
 		(wireguard-peer
-		  (name "mullvad-server")
+		  (name name)
 		  (public-key public-key)
 		  (allowed-ips '("0.0.0.0/0" "::0/0"))
 		  (endpoint endpoint))))))
-
 
 (define %wireguard-configuration
   (begin
@@ -186,10 +193,11 @@ COMMIT
 			  %mullvad-server-type))
 	(let* ((servers (read (open-input-file "/etc/wireguard/servers-list")))
 		   (server (list-ref servers (random (length servers))))
-		   (addresses (first server))
-		   (endpoint (second server))
-		   (public-key (third server)))
-	  (make-mullvad-wireguard-configuration addresses endpoint public-key))))
+		   (name (first server))
+		   (addresses (string-split (second server) #\,))
+		   (endpoint (third server))
+		   (public-key (fourth server)))
+	  (make-mullvad-wireguard-configuration name addresses endpoint public-key %mullvad-kill-switch))))
 
 (define %solaar-udev-rules
   (file->udev-rule
