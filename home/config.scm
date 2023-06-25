@@ -7,6 +7,7 @@
 			 (gnu home services guix)
 			 (nongnu packages mozilla)
 			 (nongnu packages steam-client)
+			 (nongnu packages messaging)
 			 (nongnu packages fonts)
 			 (guix build-system copy)
 			 (guix build copy-build-system)
@@ -78,12 +79,12 @@
 		font-google-noto-emoji font-microsoft-web-core-fonts
 		McMojave-cursors materia-theme
 		sway bemenu waybar swaylock swaynotificationcenter
-		xorg-server-xwayland qtwayland
+		xorg-server-xwayland qtwayland-5
 		grimshot clipman wl-clipboard light solaar
 		blueman wireplumber pipewire pulseaudio pavucontrol
 		alacritty neovim emacs
 		steam ungoogled-chromium
-		keepassxc calibre obs))
+		keepassxc calibre obs obs-wlrobs signal-desktop))
 
 (define %bash-profile
   (string-append
@@ -115,22 +116,20 @@ fi"))
 
 (define %gtk2-config
   (string-append
-"gtk-theme-name=\"" %theme "\"
-gtk-cursor-theme-name=\"" %cursor "\"
-gtk-icon-theme-name=\"" %theme "\"
-gtk-font-name=\"" %font "\"
+"gtk-theme-name = \"" %theme "\"
+gtk-cursor-theme-name = \"" %cursor "\"
+gtk-font-name = \"" %font "\"
 "))
 
 (define %gtk3-config
   (string-append
 "[Settings]
-gtk-theme-name=\"" %theme "\"
-gtk-cursor-theme-name=\"" %cursor "\"
-gtk-cursor-theme-size=" (number->string %cursor-size) "
-gtk-icon-theme-name=\"" %theme "\"
-gtk-font-name=\"" %font "\"
+gtk-theme-name = " %theme "
+gtk-cursor-theme-name = " %cursor "
+gtk-cursor-theme-size = " (number->string %cursor-size) "
+gtk-font-name = " %font "
 "(if %dark-theme
-	"gtk-application-prefer-dark-theme=true\n"
+	"gtk-application-prefer-dark-theme = true\n"
 	"")))
 
 (define %qt4-config

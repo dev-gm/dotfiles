@@ -23,3 +23,5 @@
 	(home-page "https://github.com/vinceliuice/McMojave-cursors")
 	(license gpl3)))
 
+McMojave-cursors
+

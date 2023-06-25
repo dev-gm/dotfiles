@@ -156,13 +156,13 @@ COMMIT
 
 ; /etc/wireguard must contain:
 ;	private.key
-;	servers/$(%mullvad-server-type)-wg-*.conf
+;	servers/$(%mullvad-server-type)*.conf
 
-(define %mullvad-server-type "us-nyc")
+(define %mullvad-server-type "il") ; israel
 
-(define (make-mullvad-wireguard-configuration endpoint public-key)
+(define (make-mullvad-wireguard-configuration addresses endpoint public-key)
   (wireguard-configuration
-	(addresses '("10.67.231.28/32" "fc00:bbbb:bbbb:bb01::4:e71b/128"))
+	(addresses (string-split addresses #\,))
 	(dns '("100.64.0.7"))
 	(private-key "/etc/wireguard/private.key")
 	(post-up '("iptables -I OUTPUT ! -o %i -m mark ! --mark $(wg show %i fwmark) -m addrtype ! --dst-type LOCAL -j REJECT" "ip6tables -I OUTPUT ! -o %i -m mark ! --mark $(wg show %i fwmark) -m addrtype ! --dst-type LOCAL -j REJECT"))
@@ -186,9 +186,10 @@ COMMIT
 			  %mullvad-server-type))
 	(let* ((servers (read (open-input-file "/etc/wireguard/servers-list")))
 		   (server (list-ref servers (random (length servers))))
-		   (endpoint (first server))
-		   (public-key (second server)))
-	  (make-mullvad-wireguard-configuration endpoint public-key))))
+		   (addresses (first server))
+		   (endpoint (second server))
+		   (public-key (third server)))
+	  (make-mullvad-wireguard-configuration addresses endpoint public-key))))
 
 (define %solaar-udev-rules
   (file->udev-rule
@@ -202,8 +203,7 @@ COMMIT
 
 (define %services (append
 					(list (service wpa-supplicant-service-type)
-						  (service network-manager-service-type
-								   (network-manager-configuration))
+						  (service network-manager-service-type)
 						  (service iptables-service-type
 								   (iptables-configuration
 									 (ipv4-rules %iptables-rules)
@@ -233,6 +233,7 @@ COMMIT
 									 (cpu-max-perf-on-bat 25)
 									 (cpu-boost-on-ac? #t)
 									 (cpu-boost-on-bat? #f)))
+						  (service unattended-upgrade-service-type)
 						  (udev-rules-service 'solaar %solaar-udev-rules))
 					(modify-services %base-services
 									 (guix-service-type config =>
