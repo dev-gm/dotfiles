@@ -128,8 +128,8 @@ root ALL=(ALL) ALL
 						  "0na31fzvm5jh2c1rh260ghq61fsaqdfqmi0n7nbhjzpmcd23wx6z"))))
 
 (define %packages (append
-					(list mesa vulkan-loader intel-media-driver intel-vaapi-driver libva wpa-supplicant
-						  nss-certs nvi bluez fwupd-nonfree wireguard-tools iptables)
+					(list mesa vulkan-loader intel-media-driver intel-vaapi-driver libva
+						  wpa-supplicant nss-certs nvi bluez fwupd-nonfree wireguard-tools)
 					%base-packages))
 
 (define %iptables-rules
@@ -156,7 +156,7 @@ COMMIT
 
 ; /etc/wireguard/servers must contain all mullvad wireguard config files
 
-(define %mullvad-server-type "sg-sin") ; singapore
+(define %mullvad-server-type "sg")
 
 (define %mullvad-dns "100.64.0.7")
 
@@ -251,7 +251,7 @@ COMMIT
 															(append (list "https://substitutes.nonguix.org")
 																	%default-substitute-urls))
 														  (authorized-keys
-															(append (list (local-file "nonguix-signing-key.pub"))
+															(append (list (local-file "nonguix/signing-key.pub"))
 																	%default-authorized-guix-keys)))))))
 
 (operating-system

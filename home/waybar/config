@@ -75,7 +75,7 @@
 	},
 
 	"clock": {
-		"timezone": "America/New_York",
+		"timezone": "Asia/Bangkok",
 		"tooltip-format": "<big>{:%I:%M - %b %d}</big>\n<tt><small>{calendar}</small></tt>",
 		"interval": 1,
 		"format": "{:%I:%M:%S}",
@@ -131,9 +131,9 @@
       "tooltip": false,
       "format": "{icon}",
       "format-icons": {
-        "notification": "<span foreground='red'><sup></sup></span>",
+        "notification": "<span foreground='red'><b><sup>!!</sup></b></span>",
         "none": "",
-        "dnd-notification": "<span foreground='red'><sup></sup></span>",
+        "dnd-notification": "<span foreground='red'><b><sup>!!</sup></b></span>",
         "dnd-none": ""
       },
       "return-type": "json",

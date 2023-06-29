@@ -5,10 +5,10 @@
 			 (gnu home services shells)
 			 (gnu home services desktop)
 			 (gnu home services guix)
-			 (nongnu packages mozilla)
 			 (nongnu packages steam-client)
 			 (nongnu packages messaging)
 			 (nongnu packages fonts)
+			 (games packages minecraft)
 			 (guix build-system copy)
 			 (guix build copy-build-system)
 			 (guix utils)
@@ -56,22 +56,22 @@
 	(home-page "https://github.com/vinceliuice/McMojave-cursors")
 	(license gpl3)))
 
-;(define firefox/wayland-112.0.2
-;  (let*
-;	((channels
-;	   (list (channel
-;			   (name 'nonguix)
-;			   (url "https://gitlab.com/nonguix/nonguix")
-;			   (branch "master")
-;			   (commit "80e245c64551e16cf4472bca08bb444f97b336c0"))
-;			 (channel
-;			   (name 'guix)
-;			   (url "https://git.savannah.gnu.org/git/guix.git")
-;			   (branch "master")
-;			   (commit "0a164b344d6dabb0dc38f61cc2f4868fa15dec63"))))
-;	 (inferior
-;	   (inferior-for-channels channels)))
-;	(first (lookup-inferior-packages inferior "firefox-wayland"))))
+(define firefox/wayland-114
+  (let*
+	((channels
+	   (list (channel
+			   (name 'nonguix)
+			   (url "https://gitlab.com/nonguix/nonguix")
+			   (branch "master")
+			   (commit "91be26a9d59dbeb6a373b6737797852437463f45"))
+			 (channel
+			   (name 'guix)
+			   (url "https://git.savannah.gnu.org/git/guix.git")
+			   (branch "master")
+			   (commit "10ff8ff4b5655b9f4dbb68535b949bd67c3b8028"))))
+	 (inferior
+	   (inferior-for-channels channels)))
+	(first (lookup-inferior-packages inferior "firefox-wayland"))))
 
 (define %packages
   (list font-adobe-source-code-pro font-adobe-source-sans-pro
@@ -82,8 +82,8 @@
 		xorg-server-xwayland qtwayland-5
 		grimshot clipman wl-clipboard light solaar
 		blueman wireplumber pipewire pulseaudio pavucontrol
+		prismlauncher steam firefox/wayland-114
 		alacritty neovim emacs
-		steam ungoogled-chromium
 		keepassxc calibre obs obs-wlrobs signal-desktop))
 
 (define %bash-profile
@@ -97,22 +97,6 @@ if [ \"$(tty)\" = \"/dev/tty1\" ]; then
 fi"))
 
 (define %bashrc "flashfetch")
-
-(define %wayland-env-variables
-   `(("XDG_CURRENT_DESKTOP" . "sway")
-	 ;("XDG_RUNTIME_DIR" . "/run/user/1000")
-	 ("XDG_SESSION_TYPE" . "wayland")
-	 ("QT_SCALE_FACTOR" . "1")
-	 ("QT_QPA_PLATFORM" . "wayland")
-	 ("QT_WAYLAND_DISABLE_WINDOWDECORATION" . "1")
-	 ("MOZ_ENABLE_WAYLAND" . "1")
-	 ("ELM_ENGINE" . "wayland_egl")
-	 ("ECORE_EVAS_ENGINE" . "wayland-egl")
-	 ("GDK_BACKEND" . "wayland")
-	 ("_JAVA_AWT_WM_NONREPARENTING" . "1")))
-
-(define %qt5-theme-env-variable
-  `(("QT_STYLE_OVERRIDE" . ,%theme)))
 
 (define %gtk2-config
   (string-append
@@ -137,6 +121,23 @@ gtk-font-name = " %font "
 "[Qt]
 style=" %theme "
 "))
+
+(define %qt5-theme-env-variable
+  `(("QT_STYLE_OVERRIDE" . ,%theme)))
+
+(define %wayland-env-variables
+   `(("XDG_DATA_DIRS" . ,(string-append "/home/" %username "/.guix-home/profile/share"))
+	 ("XDG_CURRENT_DESKTOP" . "sway")
+	 ;("XDG_RUNTIME_DIR" . "/run/user/1000")
+	 ("XDG_SESSION_TYPE" . "wayland")
+	 ("QT_SCALE_FACTOR" . "1")
+	 ("QT_QPA_PLATFORM" . "wayland")
+	 ("QT_WAYLAND_DISABLE_WINDOWDECORATION" . "1")
+	 ("MOZ_ENABLE_WAYLAND" . "1")
+	 ("ELM_ENGINE" . "wayland_egl")
+	 ("ECORE_EVAS_ENGINE" . "wayland-egl")
+	 ("GDK_BACKEND" . "wayland")
+	 ("_JAVA_AWT_WM_NONREPARENTING" . "1")))
 
 (define %vim-plug-file
   (origin
@@ -175,45 +176,45 @@ style=" %theme "
 	(".gitconfig" ,(plain-file "gitconfig" %gitconfig-file))
 	(".gtkrc-2.0" ,(plain-file "gtkrc-2.0" %gtk2-config))))
 
+(define %extra-channels
+  (list (channel
+		  (name 'nonguix)
+		  (url "https://gitlab.com/nonguix/nonguix.git")
+		  (introduction
+			(make-channel-introduction
+			  "897c1a470da759236cc11798f4e0a5f7d4d59fbc"
+			  (openpgp-fingerprint
+				"2A39 3FFF 68F4 EF7A 3D29  12AF 6F51 20A0 22FB B2D5"))))
+		(channel
+		  (name 'guix-gaming-games)
+		  (url "https://gitlab.com/guix-gaming-channels/games.git")
+		  (introduction
+			(make-channel-introduction
+			  "c23d64f1b8cc086659f8781b27ab6c7314c5cca5"
+			  (openpgp-fingerprint
+				"50F3 3E2E 5B0C 3D90 0424  ABE8 9BDC F497 A4BB CC7F"))))))
+
 (define %services
-  (list
-    (service home-bash-service-type
-	     (home-bash-configuration
-	       (guix-defaults? #t)
-	       (bash-profile (list (plain-file "bash-profile" %bash-profile)))
-		   (bashrc (list (plain-file "bashrc" %bashrc)))))
-	(simple-service 'wayland-env-variables-service
-					home-environment-variables-service-type
-					%wayland-env-variables)
-	(simple-service 'qt5-theme-env-variable-service
-					home-environment-variables-service-type
-					%qt5-theme-env-variable)
-	(simple-service 'xdg-config-files-service
-					home-xdg-configuration-files-service-type
-					%xdg-config-files)
-	(simple-service 'home-files-service
-					home-files-service-type
-					%home-files)
-	(simple-service 'new-channels-service
-					home-channels-service-type
-					(append (list
-							  (channel
-								(name 'nonguix)
-								(url "https://gitlab.com/nonguix/nonguix.git")
-								(introduction
-								  (make-channel-introduction
-									"897c1a470da759236cc11798f4e0a5f7d4d59fbc"
-									(openpgp-fingerprint
-									  "2A39 3FFF 68F4 EF7A 3D29  12AF 6F51 20A0 22FB B2D5"))))
-							  (channel
-								(name 'guix-gaming-games)
-								(url "https://gitlab.com/guix-gaming-channels/games.git")
-								(introduction
-								  (make-channel-introduction
-									"c23d64f1b8cc086659f8781b27ab6c7314c5cca5"
-									(openpgp-fingerprint
-									  "50F3 3E2E 5B0C 3D90 0424  ABE8 9BDC F497 A4BB CC7F")))))
-							%default-channels))))
+  (list (service home-bash-service-type
+				 (home-bash-configuration
+				   (guix-defaults? #t)
+				   (bash-profile (list (plain-file "bash-profile" %bash-profile)))
+				   (bashrc (list (plain-file "bashrc" %bashrc)))))
+		(simple-service 'wayland-env-variables-service
+						home-environment-variables-service-type
+						%wayland-env-variables)
+		(simple-service 'qt5-theme-env-variable-service
+						home-environment-variables-service-type
+						%qt5-theme-env-variable)
+		(simple-service 'xdg-config-files-service
+						home-xdg-configuration-files-service-type
+						%xdg-config-files)
+		(simple-service 'home-files-service
+						home-files-service-type
+						%home-files)
+		(simple-service 'extra-channels-service
+						home-channels-service-type
+						%extra-channels)))
 
 (home-environment
   (packages %packages)
