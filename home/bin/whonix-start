@@ -1,6 +1,6 @@
 #!/bin/sh
 
-if [ -z "$(ls /dev/mapper/vm-images)" ]; then
+if [ -z "$(ls /dev/mapper/vm-images 2>/dev/null)" ]; then
 	guix shell cryptsetup -- sudo cryptsetup open /dev/nvme0n1p3 vm-images
 fi
 
@@ -9,5 +9,3 @@ sudo mount /dev/mapper/vm-images /var/lib/libvirt/images
 
 sudo virsh -c qemu:///system start Whonix-Gateway
 sudo virsh -c qemu:///system start Whonix-Workstation
-
-vncviewer 127.0.0.1::5901
