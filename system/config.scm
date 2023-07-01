@@ -18,9 +18,9 @@
 			 (ice-9 textual-ports)
 			 (srfi srfi-1))
 
-(use-service-modules base networking cups dbus authentication virtualization desktop syncthing admin pm vpn)
+(use-service-modules base networking cups dbus authentication virtualization desktop syncthing admin pm vpn games)
 
-(use-package-modules base linux admin certs nvi gl vulkan video vpn)
+(use-package-modules base linux admin certs nvi gl vulkan video vpn virtualization cryptsetup)
 
 (set! *random-state* (random-state-from-platform))
 
@@ -75,31 +75,13 @@
 						  ibt-hw-firmware)
 					%base-firmware))
 
-(define %mapped-devices
-  (list (mapped-device
-		  (source (uuid "1ff5d411-6151-4ee0-8c37-699f875adf75"))
-		  (target "root")
-		  (type luks-device-mapping))))
-
-(define %file-systems (append
-						(list (file-system
-								(device (file-system-label "ROOT"))
-								(mount-point "/")
-								(type "ext4")
-								(dependencies %mapped-devices))
-							  (file-system
-								(device (file-system-label "BOOT"))
-								(mount-point "/boot/efi")
-								(type "vfat")))
-						%base-file-systems))
-
 (define %primary-username "gavin")
 
 (define %users (cons (user-account
 					   (name %primary-username)
 					   (group %primary-username)
 					   (supplementary-groups '("wheel" "audio" "video" "netdev"
-											   "network" "dialout" "kvm"
+											   "network" "dialout" "kvm" "libvirt"
 											   "audio" "video" "adbusers")))
 					 %base-user-accounts))
 
@@ -120,6 +102,24 @@ root ALL=(ALL) ALL
 "NOPASSWD: /home/" %primary-username
 "/.guix-home/profile/bin/light")))
 
+(define %mapped-devices
+  (list (mapped-device
+		  (source (uuid "1ff5d411-6151-4ee0-8c37-699f875adf75"))
+		  (target "root")
+		  (type luks-device-mapping))))
+
+(define %file-systems (append
+						(list (file-system
+								(device "/dev/mapper/root")
+								(mount-point "/")
+								(type "ext4")
+								(dependencies %mapped-devices))
+							  (file-system
+								(device (file-system-label "BOOT"))
+								(mount-point "/boot/efi")
+								(type "vfat")))
+						%base-file-systems))
+
 (define %hosts-file (origin
 					  (uri "https://raw.githubusercontent.com/StevenBlack/hosts/master/hosts")
 					  (method url-fetch)
@@ -128,8 +128,8 @@ root ALL=(ALL) ALL
 						  "0na31fzvm5jh2c1rh260ghq61fsaqdfqmi0n7nbhjzpmcd23wx6z"))))
 
 (define %packages (append
-					(list mesa vulkan-loader intel-media-driver intel-vaapi-driver libva
-						  wpa-supplicant nss-certs nvi bluez wireguard-tools)
+					(list nvi mesa vulkan-loader intel-media-driver intel-vaapi-driver libva
+						  nss-certs wpa-supplicant bluez wireguard-tools virt-manager cryptsetup)
 					%base-packages))
 
 (define %iptables-rules
@@ -241,6 +241,11 @@ COMMIT
 									 (cpu-max-perf-on-bat 25)
 									 (cpu-boost-on-ac? #t)
 									 (cpu-boost-on-bat? #f)))
+						  (service libvirt-service-type
+								   (libvirt-configuration
+									 (unix-sock-group "libvirt")))
+						  (service virtlog-service-type)
+						  (service joycond-service-type)
 						  (service unattended-upgrade-service-type)
 						  (udev-rules-service 'solaar %solaar-udev-rules))
 					(modify-services %base-services

@@ -1,0 +1,2 @@
+#!/bin/sh
+flatpak run --env=QT_STYLE_OVERRIDE=Adwaita-Dark org.DolphinEmu.dolphin-emu

@@ -1,0 +1,2 @@
+#!/bin/sh
+flatpak run --env=QT_STYLE_OVERRIDE=Adwaita-Dark --filesystem=/run/current-system/profile/etc/ssl/certs/ca-certificates.crt:ro org.kde.audiotube

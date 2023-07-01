@@ -1,0 +1,2 @@
+#!/bin/sh
+flatpak run --filesystem=host:ro $@ com.moonlight_stream.Moonlight
