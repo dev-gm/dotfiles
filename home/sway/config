@@ -90,8 +90,6 @@ smart_borders on
 bindgesture swipe:right workspace prev
 bindgesture swipe:left workspace next
 
-
-
 ### Key bindings
 
 # Basics:
@@ -257,7 +255,7 @@ mode "resize" {
 
 bindsym $mod+Shift+r mode "resize"
 
-bindsym $mod+Shift+n exec swaync-client -t -sw
+bindsym $mod+t exec swaync-client -C
 
 exec_always wl-paste -t text --watch clipman store
 exec_always wl-paste -p -t text --watch clipman store -P --histpath="~/.local/share/clipman-primary.json"

@@ -23,7 +23,7 @@
 			 (srfi srfi-1))
 
 (use-package-modules wm admin xdisorg terminals networking
-					 chromium audio pulseaudio video
+					 chromium audio pulseaudio video web-browsers
 					 password-utils pciutils fonts ebook vim
 					 emacs gnome-xyz xorg qt linux)
 
@@ -77,12 +77,13 @@
   (list font-adobe-source-code-pro font-adobe-source-sans-pro
 		font-awesome font-dejavu font-fira-code font-go
 		font-google-noto-emoji font-microsoft-web-core-fonts
-		McMojave-cursors materia-theme
+		McMojave-cursors materia-theme kvantum
 		sway bemenu waybar swaylock swaynotificationcenter
 		xorg-server-xwayland qtwayland-5
 		grimshot clipman wl-clipboard light solaar
 		blueman wireplumber pipewire pulseaudio pavucontrol
-		prismlauncher steam firefox/wayland-114
+		prismlauncher steam
+		firefox/wayland-114 qutebrowser
 		alacritty neovim emacs
 		keepassxc calibre obs obs-wlrobs signal-desktop))
 
@@ -122,22 +123,37 @@ gtk-font-name = " %font "
 style=" %theme "
 "))
 
-(define %qt5-theme-env-variable
-  `(("QT_STYLE_OVERRIDE" . ,%theme)))
-
-(define %wayland-env-variables
+(define %env-variables
    `(("XDG_DATA_DIRS" . ,(string-append "/home/" %username "/.guix-home/profile/share"))
 	 ("XDG_CURRENT_DESKTOP" . "sway")
-	 ;("XDG_RUNTIME_DIR" . "/run/user/1000")
 	 ("XDG_SESSION_TYPE" . "wayland")
 	 ("QT_SCALE_FACTOR" . "1")
 	 ("QT_QPA_PLATFORM" . "wayland")
+	 ("QT_STYLE_OVERRIDE" . "kvantum")
 	 ("QT_WAYLAND_DISABLE_WINDOWDECORATION" . "1")
 	 ("MOZ_ENABLE_WAYLAND" . "1")
 	 ("ELM_ENGINE" . "wayland_egl")
 	 ("ECORE_EVAS_ENGINE" . "wayland-egl")
 	 ("GDK_BACKEND" . "wayland")
 	 ("_JAVA_AWT_WM_NONREPARENTING" . "1")))
+
+(define %kvantum-config "theme=MateriaDark")
+
+(define %kvantum-MateriaDark-config-file
+  (origin
+	(uri "https://raw.githubusercontent.com/PapirusDevelopmentTeam/materia-kde/master/Kvantum/MateriaDark/MateriaDark.kvconfig")
+	(method url-fetch)
+	(sha256
+	  (base32
+		"0j1cd5yyah48kvgmz4bry06jhjl3mk2lrg88kh53ybm3vp3p670d"))))
+
+(define %kvantum-MateriaDark-svg-file
+  (origin
+	(uri "https://raw.githubusercontent.com/PapirusDevelopmentTeam/materia-kde/master/Kvantum/MateriaDark/MateriaDark.svg")
+	(method url-fetch)
+	(sha256
+	  (base32
+		"1vaa9x69bm77633h2frix40gdbsnbvqyz2y3lahrmgw6hsj7a6pk"))))
 
 (define %vim-plug-file
   (origin
@@ -165,6 +181,9 @@ style=" %theme "
 	("waybar/style.css" ,(local-file "waybar/style.css"))
 	("alacritty/alacritty.yml" ,(local-file "alacritty/alacritty.yml"))
 	("gtk-3.0/settings.ini" ,(plain-file "settings.ini" %gtk3-config))
+	("Kvantum/kvantum.kvconfig" ,(plain-file "kvantum.kvconfig" %kvantum-config))
+	("Kvantum/MateriaDark/MateriaDark.kvconfig" ,%kvantum-MateriaDark-config-file)
+	("Kvantum/MateriaDark/MateriaDark.svg" ,%kvantum-MateriaDark-svg-file)
 	("Trolltech.conf" ,(plain-file "Trolltech.conf" %qt4-config))
 	("solaar/config.json" ,(local-file "solaar/config.json"))))
 
@@ -200,12 +219,9 @@ style=" %theme "
 				   (guix-defaults? #t)
 				   (bash-profile (list (plain-file "bash-profile" %bash-profile)))
 				   (bashrc (list (plain-file "bashrc" %bashrc)))))
-		(simple-service 'wayland-env-variables-service
+		(simple-service 'env-variables-service
 						home-environment-variables-service-type
-						%wayland-env-variables)
-		(simple-service 'qt5-theme-env-variable-service
-						home-environment-variables-service-type
-						%qt5-theme-env-variable)
+						%env-variables)
 		(simple-service 'xdg-config-files-service
 						home-xdg-configuration-files-service-type
 						%xdg-config-files)

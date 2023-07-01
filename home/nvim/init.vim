@@ -80,6 +80,7 @@ Plug 'zakuro9715/vim-vtools'
 Plug 'cheap-glitch/vim-v'
 Plug 'hrsh7th/vim-vsnip'
 Plug 'hrsh7th/vim-vsnip-integ'
+Plug 'glacambre/firenvim', { 'do': { _ -> firenvim#install(0) } }
 call plug#end()
 
 " THEME

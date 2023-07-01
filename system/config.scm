@@ -129,7 +129,7 @@ root ALL=(ALL) ALL
 
 (define %packages (append
 					(list mesa vulkan-loader intel-media-driver intel-vaapi-driver libva
-						  wpa-supplicant nss-certs nvi bluez fwupd-nonfree wireguard-tools)
+						  wpa-supplicant nss-certs nvi bluez wireguard-tools)
 					%base-packages))
 
 (define %iptables-rules

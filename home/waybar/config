@@ -104,18 +104,18 @@
 			"warning": 30,
 			"critical": 15
 		},
-		"format": "BAT {capacity}%",
-		//"format": "{icon}  {capacity}%",
-		//"format-charging": "{icon}   {capacity}%",
-		//"format-critical": "{icon}   {capacity}%: {time}",
-		//"format-alt": "{timeTo}",
-		//"format-icons": [
-		//	"",
-		//	"",
-		//	"",
-		//	"",
-		//	""
-		//],
+		//"format": "BAT {capacity}%",
+		"format": "{icon}  {capacity}%",
+		"format-charging": "{icon}Z {capacity}%",
+		"format-critical": "{icon}  {capacity}%: {time}",
+		"format-alt": "{timeTo}",
+		"format-icons": [
+			"",
+			"",
+			"",
+			"",
+			""
+		],
 		"tooltip-format-discharging": "{timeTo}",
 		"tooltip-format-charging": "{timeTo}"
 	},
