@@ -25,7 +25,7 @@
 (use-package-modules wm admin xdisorg terminals networking
 					 chromium audio pulseaudio video web-browsers
 					 password-utils pciutils fonts ebook vim
-					 emacs gnome-xyz xorg qt linux)
+					 emacs gnome-xyz xorg qt linux vnc)
 
 (define %username "gavin")
 (define %email "github@gavinm.us")
@@ -36,6 +36,18 @@
 (define %font "Dejavu Sans 11")
 (define %dark-theme #t)
 (define %opam-feature #t)
+
+(define local-utils
+  (package
+	(name "local-utils")
+	(build-system copy-build-system)
+	(source (local-file "utils" #:recursive? #t))
+	(arguments `(#:install-plan '(("." "bin"))))
+	(version "1.0")
+	(synopsis "local utils")
+	(description "local utils")
+	(home-page "https://github.com/dev-gm/dotfiles")
+	(license gpl3)))
 
 (define McMojave-cursors
   (package
@@ -85,7 +97,9 @@
 		prismlauncher steam
 		firefox/wayland-114 qutebrowser
 		alacritty neovim emacs
-		keepassxc calibre obs obs-wlrobs signal-desktop))
+		keepassxc calibre obs obs-wlrobs signal-desktop
+		tigervnc-client
+		local-utils))
 
 (define %bash-profile
   (string-append

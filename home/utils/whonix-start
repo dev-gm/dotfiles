@@ -1,0 +1,16 @@
+#!/bin/sh
+
+if [ -z "$(ls /dev/mapper/vm-images 2>/dev/null)" ]; then
+	echo "Decrypting vm-images partition"
+	guix shell cryptsetup -- sudo cryptsetup open /dev/nvme0n1p3 vm-images
+fi
+
+sudo mkdir -p /var/lib/libvirt/images
+echo "Mounting vm-images"
+sudo mount /dev/mapper/vm-images /var/lib/libvirt/images
+
+echo "Starting Whonix-Gateway"
+sudo virsh -c qemu:///system start Whonix-Gateway 1>/dev/null
+
+echo "Starting Whonix-Gateway"
+sudo virsh -c qemu:///system start Whonix-Workstation 1>/dev/null

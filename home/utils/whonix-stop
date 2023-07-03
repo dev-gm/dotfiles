@@ -1,0 +1,17 @@
+#!/bin/sh
+
+echo "Stopping Whonix-Workstation"
+sudo virsh -c qemu:///system shutdown Whonix-Workstation 1>/dev/null
+
+echo "Stopping Whonix-Workstation"
+sudo virsh -c qemu:///system shutdown Whonix-Gateway 1>/dev/null
+
+while [ -n "$(sudo virsh list | grep Whonix-Gateway)" ] || [ -n "$(sudo virsh list | grep Whonix-Workstation)" ]; do
+	sleep 0.2s
+done
+
+echo "Unmounting vm-images"
+sudo umount /dev/mapper/vm-images
+
+echo "Closing vm-images"
+guix shell cryptsetup -- sudo cryptsetup close vm-images

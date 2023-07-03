@@ -1,8 +1,0 @@
-sudo virsh -c qemu:///system shutdown Whonix-Workstation
-sudo virsh -c qemu:///system shutdown Whonix-Gateway
-
-sleep 5s
-
-sudo umount /dev/mapper/vm-images
-
-guix shell cryptsetup -- sudo cryptsetup close vm-images

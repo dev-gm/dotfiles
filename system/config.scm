@@ -20,7 +20,7 @@
 
 (use-service-modules base networking cups dbus authentication virtualization desktop syncthing admin pm vpn games)
 
-(use-package-modules base linux admin certs nvi gl vulkan video vpn virtualization cryptsetup)
+(use-package-modules base linux admin certs nvi gl vulkan video vpn)
 
 (set! *random-state* (random-state-from-platform))
 
@@ -129,7 +129,7 @@ root ALL=(ALL) ALL
 
 (define %packages (append
 					(list nvi mesa vulkan-loader intel-media-driver intel-vaapi-driver libva
-						  nss-certs wpa-supplicant bluez wireguard-tools virt-manager cryptsetup)
+						  nss-certs wpa-supplicant bluez wireguard-tools)
 					%base-packages))
 
 (define %iptables-rules

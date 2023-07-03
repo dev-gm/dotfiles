@@ -1,2 +1,0 @@
-#!/bin/sh
-flatpak run --env=QT_STYLE_OVERRIDE=Adwaita-Dark net.kuribo64.melonDS

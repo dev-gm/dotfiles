@@ -75,6 +75,7 @@
 	},
 
 	"clock": {
+		//"timezone": "America/New_York",
 		"timezone": "Asia/Bangkok",
 		"tooltip-format": "<big>{:%I:%M - %b %d}</big>\n<tt><small>{calendar}</small></tt>",
 		"interval": 1,
@@ -147,6 +148,6 @@
 		"tooltip": false,
 		"interval": 5,
 		"format": "{}",
-		"exec": "/home/gavin/.local/bin/get-wattage"
+		"exec": "get-wattage"
 	}
 }

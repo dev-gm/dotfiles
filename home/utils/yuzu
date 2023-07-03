@@ -1,0 +1,2 @@
+#!/bin/sh
+flatpak run --env=QT_STYLE_OVERRIDE="Adwaita-Dark" --env=QT_QPA_PLATFORM=xcb --command=yuzu org.yuzu_emu.yuzu

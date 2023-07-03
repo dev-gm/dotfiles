@@ -255,7 +255,8 @@ mode "resize" {
 
 bindsym $mod+Shift+r mode "resize"
 
-bindsym $mod+t exec swaync-client -C
+bindsym $mod+t exec swaync-client -t
+bindsym $mod+Alt+t exec swaync-client -C
 
 exec_always wl-paste -t text --watch clipman store
 exec_always wl-paste -p -t text --watch clipman store -P --histpath="~/.local/share/clipman-primary.json"
