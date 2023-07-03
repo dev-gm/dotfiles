@@ -40,15 +40,15 @@
 			   (name 'nonguix)
 			   (url "https://gitlab.com/nonguix/nonguix")
 			   (branch "master")
-			   (commit "69b05a57eed16218d607a90d7bc49ba79a2d850e"))
+			   (commit "211635c8e024692c2b05d1af4c9c6a43b9fc0aa1"))
 			 (channel
 			   (name 'guix)
 			   (url "https://git.savannah.gnu.org/git/guix.git")
 			   (branch "master")
-			   (commit "2e0228e736bf08d376ffbce6b5c4f899babfee5e"))))
+			   (commit "669f0eaed6310233295fbd0a077afc9ce054c6ab"))))
 	 (inferior
 	   (inferior-for-channels channels)))
-	(first (lookup-inferior-packages inferior "linux"))))
+	(first (lookup-inferior-packages inferior "linux-xanmod"))))
 
 (define %kernel-arguments
   (list

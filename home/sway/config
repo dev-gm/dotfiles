@@ -179,14 +179,12 @@ bindgesture swipe:left workspace next
 
     # Applications:
     bindsym $mod+i exec "firefox"
-	#bindsym $mod+g exec "emacs"
-    #bindsym $mod+t exec "firefox --new-tab https://classroom.google.com/"
+	bindsym $mod+g exec "emacs"
     bindsym $mod+n exec "torbrowser-launcher"
-    #bindsym $mod+d exec "lutris"
+    bindsym $mod+Alt+n exec "whonix-run"
     bindsym $mod+d exec "steam"
     bindsym $mod+c exec "keepassxc"
     bindsym $mod+v exec "pavucontrol"
-	#bindsym $mod+Shift+s exec "Discord"
 
 #
 # Layout stuff:
