@@ -1,2 +1,0 @@
-#!/bin/sh
-flatpak run --filesystem=/run/current-system/profile/etc/ssl/certs/ca-certificates.crt --env=QT_STYLE_OVERRIDE=Adwaita-Dark com.github.micahflee.torbrowser-launcher
