@@ -25,7 +25,7 @@
 (use-package-modules wm admin xdisorg terminals networking
 					 chromium audio pulseaudio video web-browsers
 					 password-utils pciutils fonts ebook vim
-					 emacs gnome-xyz xorg qt linux vnc)
+					 gnome-xyz xorg qt linux vnc)
 
 (define %username "gavin")
 (define %email "github@gavinm.us")
@@ -75,15 +75,50 @@
 			   (name 'nonguix)
 			   (url "https://gitlab.com/nonguix/nonguix")
 			   (branch "master")
-			   (commit "91be26a9d59dbeb6a373b6737797852437463f45"))
+			   (commit "91be26a9d59dbeb6a373b6737797852437463f45")
+			   (introduction
+				 (make-channel-introduction
+				   "897c1a470da759236cc11798f4e0a5f7d4d59fbc"
+				   (openpgp-fingerprint
+					 "2A39 3FFF 68F4 EF7A 3D29  12AF 6F51 20A0 22FB B2D5"))))
 			 (channel
 			   (name 'guix)
 			   (url "https://git.savannah.gnu.org/git/guix.git")
 			   (branch "master")
-			   (commit "10ff8ff4b5655b9f4dbb68535b949bd67c3b8028"))))
+			   (commit "10ff8ff4b5655b9f4dbb68535b949bd67c3b8028")
+			   (introduction
+				 (make-channel-introduction
+				   "9edb3f66fd807b096b48283debdcddccfea34bad"
+				   (openpgp-fingerprint
+					 "BBB0 2DDF 2CEA F6A8 0D1D  E643 A2A0 6DF2 A33A 54FA"))))))
 	 (inferior
 	   (inferior-for-channels channels)))
 	(first (lookup-inferior-packages inferior "firefox-wayland"))))
+
+(define emacs-pgtk-native-comp
+  (let*
+	((channels
+	   (list (channel
+			   (name 'flat)
+			   (url "https://github.com/flatwhatson/guix-channel.git")
+			   (branch "master")
+			   (introduction
+				 (make-channel-introduction
+				   "33f86a4b48205c0dc19d7c036c85393f0766f806"
+				   (openpgp-fingerprint
+					 "736A C00E 1254 378B A982  7AF6 9DBE 8265 81B6 4490"))))
+			 (channel
+			   (name 'guix)
+			   (url "https://git.savannah.gnu.org/git/guix.git")
+			   (branch "master")
+			   (introduction
+				 (make-channel-introduction
+				   "9edb3f66fd807b096b48283debdcddccfea34bad"
+				   (openpgp-fingerprint
+					 "BBB0 2DDF 2CEA F6A8 0D1D  E643 A2A0 6DF2 A33A 54FA"))))))
+	 (inferior
+	   (inferior-for-channels channels)))
+	(first (lookup-inferior-packages inferior "emacs-pgtk-native-comp"))))
 
 (define %packages
   (list font-adobe-source-code-pro font-adobe-source-sans-pro
@@ -96,7 +131,7 @@
 		blueman wireplumber pipewire pulseaudio pavucontrol
 		prismlauncher steam
 		firefox/wayland-114 qutebrowser
-		alacritty neovim emacs
+		alacritty neovim emacs-pgtk-native-comp
 		keepassxc calibre obs obs-wlrobs signal-desktop
 		tigervnc-client
 		local-utils))
