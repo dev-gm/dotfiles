@@ -77,7 +77,7 @@ bindsym Shift+XF86MonBrightnessUp exec --no-startup-id sudo light -A 1 && sudo l
 input type:keyboard {
     xkb_layout us
     xkb_variant dvp
-    xkb_options compose:102,numpad:shift3,kpdl:semi,keypad:atm,caps:ctrl_modifier
+    xkb_options compose:102,numpad:shift3,kpdl:semi,keypad:atm,caps:super
 }
 
 gaps outer 3
@@ -87,8 +87,8 @@ default_border pixel 3
 
 smart_borders on
 
-bindgesture swipe:right workspace prev
-bindgesture swipe:left workspace next
+bindgesture swipe:right move left
+bindgesture swipe:left move right
 
 ### Key bindings
 

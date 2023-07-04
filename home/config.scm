@@ -95,30 +95,30 @@
 	   (inferior-for-channels channels)))
 	(first (lookup-inferior-packages inferior "firefox-wayland"))))
 
-(define emacs-pgtk-native-comp
-  (let*
-	((channels
-	   (list (channel
-			   (name 'flat)
-			   (url "https://github.com/flatwhatson/guix-channel.git")
-			   (branch "master")
-			   (introduction
-				 (make-channel-introduction
-				   "33f86a4b48205c0dc19d7c036c85393f0766f806"
-				   (openpgp-fingerprint
-					 "736A C00E 1254 378B A982  7AF6 9DBE 8265 81B6 4490"))))
-			 (channel
-			   (name 'guix)
-			   (url "https://git.savannah.gnu.org/git/guix.git")
-			   (branch "master")
-			   (introduction
-				 (make-channel-introduction
-				   "9edb3f66fd807b096b48283debdcddccfea34bad"
-				   (openpgp-fingerprint
-					 "BBB0 2DDF 2CEA F6A8 0D1D  E643 A2A0 6DF2 A33A 54FA"))))))
-	 (inferior
-	   (inferior-for-channels channels)))
-	(first (lookup-inferior-packages inferior "emacs-pgtk-native-comp"))))
+;(define emacs-pgtk-native-comp
+;  (let*
+;	((channels
+;	   (list (channel
+;			   (name 'flat)
+;			   (url "https://github.com/flatwhatson/guix-channel.git")
+;			   (branch "master")
+;			   (introduction
+;				 (make-channel-introduction
+;				   "33f86a4b48205c0dc19d7c036c85393f0766f806"
+;				   (openpgp-fingerprint
+;					 "736A C00E 1254 378B A982  7AF6 9DBE 8265 81B6 4490"))))
+;			 (channel
+;			   (name 'guix)
+;			   (url "https://git.savannah.gnu.org/git/guix.git")
+;			   (branch "master")
+;			   (introduction
+;				 (make-channel-introduction
+;				   "9edb3f66fd807b096b48283debdcddccfea34bad"
+;				   (openpgp-fingerprint
+;					 "BBB0 2DDF 2CEA F6A8 0D1D  E643 A2A0 6DF2 A33A 54FA"))))))
+;	 (inferior
+;	   (inferior-for-channels channels)))
+;	(first (lookup-inferior-packages inferior "emacs-pgtk-native-comp"))))
 
 (define %packages
   (list font-adobe-source-code-pro font-adobe-source-sans-pro
@@ -131,7 +131,7 @@
 		blueman wireplumber pipewire pulseaudio pavucontrol
 		prismlauncher steam
 		firefox/wayland-114 qutebrowser
-		alacritty neovim emacs-pgtk-native-comp
+		alacritty neovim ;emacs-pgtk-native-comp
 		keepassxc calibre obs obs-wlrobs signal-desktop
 		tigervnc-client
 		local-utils))
@@ -224,7 +224,6 @@ style=" %theme "
 (define %xdg-config-files
   `(("sway/config" ,(local-file "sway/config"))
 	("sway/blobs-d.svg" ,(local-file "sway/blobs-d.svg"))
-	;("emacs/init.el" ,(local-file "emacs/init.el"))
 	("nvim/init.vim" ,(local-file "nvim/init.vim"))
 	("waybar/config" ,(local-file "waybar/config"))
 	("waybar/style.css" ,(local-file "waybar/style.css"))
@@ -238,8 +237,6 @@ style=" %theme "
 
 (define %home-files
   `((".local/share/nvim/site/autoload/plug.vim" ,%vim-plug-file)
-	;(".local/bin/flashfetch" ,(local-file "bin/flashfetch"))
-	;(".local/bin/get-wattage" ,(local-file "bin/get-wattage"))
 	(".vimrc" ,(local-file "vim/vimrc"))
 	(".gitconfig" ,(plain-file "gitconfig" %gitconfig-file))
 	(".gtkrc-2.0" ,(plain-file "gtkrc-2.0" %gtk2-config))))
