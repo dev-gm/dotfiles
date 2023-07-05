@@ -3,9 +3,6 @@
 # Logo key. Use Mod1 for Alt.
 set $mod Mod4
 
-exec --no-startup-id swaymsg workspace 0
-exec --no-startup-id sudo light -I
-
 # Home row direction keys, like vim
 set $left h
 set $down j
@@ -26,29 +23,18 @@ set $lock swaylock -f -c 000000 -s fill
 
 ### Output configuration
 
-# Default wallpaper (more resolutions are available in /usr/share/backgrounds/sway/)
-output * bg $HOME/.config/sway/blobs-d.svg fill
-
-# Example configuration:
-
-output eDP-1 scale 1.33
-output DP-1 mode 2560x1440@144Hz
+output * bg $HOME/.config/sway/blobs-d.png fill
 
 # You can get the names of your outputs by running: swaymsg -t get_outputs
+output eDP-1 scale 1.33
+output DP-1 mode 2560x1440@144Hz
 
 font pango:DejavuSansMono Bold 8
 
 seat seat0 xcursor_theme McMojave-cursors 18
 
-### Idle configuration
-#
-# exec swayidle timeout 180 'swaymsg "output * dpms off"' resume 'swaymsg "output * dpms on"' timeout 240 'sudo zzz' timeout 600 'sudo zzz & swaylock -f -c 000000'
-# exec swayidle timeout 240 'swaymsg "output * dpms off"' resume 'swaymsg "output * dpms on"' timeout 480 "$lock"
-
 ### Input configuration
-#
-# Example configuration:
-#
+
 input type:touchpad {
 	dwt disabled
 	tap enabled
@@ -87,32 +73,33 @@ default_border pixel 3
 
 smart_borders on
 
-bindgesture swipe:right move left
-bindgesture swipe:left move right
+bindgesture swipe:up layout tabbed
+bindgesture swipe:down layout toggle split
+bindgesture swipe:right focus right
+bindgesture swipe:left focus left
+
+for_window [app_id="Picture-in-Picture"] floating enable, sticky enable, resize set width 120 height 90
+for_window [title="Picture-in-Picture"] floating enable, sticky enable
+for_window [window_role="pop-up"] floating enable
+for_window [window_role="bubble"] floating enable
+for_window [window_role="task_dialog"] floating enable
+for_window [window_role="Preferences"] floating enable
+for_window [window_type="dialog"] floating enable
+for_window [window_type="menu"] floating enable
+for_window [window_role="About"] floating enable
+for_window [class="xdg-desktop-portal-kde"] floating enable
+for_window [app_id="KeePassXC - Browser Access Request"] floating enable, sticky enable
+for_window [title="KeePassXC - Browser Access Request"] floating enable, sticky enable
+for_window [app_id="Unlock Database - KeePassXC"] floating enable, sticky enable
+for_window [title="Unlock Database - KeePassXC"] floating enable, sticky enable
+for_window [app_id="mpv"] layout tabbed
+for_window [title=".blueman-applet-real"] kill
+for_window [title="Wine System Tray"] kill
 
 ### Key bindings
 
 # Basics:
-#
-	for_window [app_id="Picture-in-Picture"] floating enable, sticky enable, resize set width 120 height 90
-	for_window [title="Picture-in-Picture"] floating enable, sticky enable
-	for_window [window_role="pop-up"] floating enable
-    for_window [window_role="bubble"] floating enable
-    for_window [window_role="task_dialog"] floating enable
-    for_window [window_role="Preferences"] floating enable
-    for_window [window_type="dialog"] floating enable
-    for_window [window_type="menu"] floating enable
-    for_window [window_role="About"] floating enable
-    for_window [class="xdg-desktop-portal-kde"] floating enable
-	for_window [app_id="KeePassXC - Browser Access Request"] floating enable, sticky enable
-	for_window [title="KeePassXC - Browser Access Request"] floating enable, sticky enable
-	for_window [app_id="Unlock Database - KeePassXC"] floating enable, sticky enable
-	for_window [title="Unlock Database - KeePassXC"] floating enable, sticky enable
-    for_window [app_id="mpv"] layout tabbed
-	for_window [title=".blueman-applet-real"] kill
-	for_window [title="Wine System Tray"] kill
-
-    # Start a terminal
+	# Start a terminal
     bindsym $mod+Return exec $term
 
     # Kill focused window
@@ -133,14 +120,14 @@ bindgesture swipe:left move right
 
     # Exit sway (logs you out of your Wayland session)
     bindsym $mod+Shift+period exec swaynag -t warning -m 'Exit?' -b 'Yes' 'swaymsg exit'
-#
+
 # Moving around:
-#
     # Move your focus around
     bindsym $mod+$left focus left
     bindsym $mod+$down focus down
     bindsym $mod+$up focus up
     bindsym $mod+$right focus right
+
     # Or use $mod+[up|down|left|right]
     bindsym $mod+Left focus left
     bindsym $mod+Down focus down
@@ -164,6 +151,7 @@ bindgesture swipe:left move right
     bindsym $mod+plus workspace 4
     bindsym $mod+bracketright workspace 6
     bindsym $mod+exclam workspace 8
+
     # Move focused container to workspace
     bindsym $mod+Shift+bracketleft move container to workspace 7
     bindsym $mod+Shift+braceleft move container to workspace 5
@@ -175,21 +163,17 @@ bindgesture swipe:left move right
     bindsym $mod+Shift+plus move container to workspace 4
     bindsym $mod+Shift+bracketright move container to workspace 6
     bindsym $mod+Shift+exclam move container to workspace 8
-    # Note: workspaces can have any name you want, not just numbers.
-    # We just use 1-10 as the default.
 
-    # Applications:
+# Applications:
     bindsym $mod+i exec "firefox"
-	bindsym $mod+g exec "emacs"
-    bindsym $mod+n exec "torbrowser-launcher"
-    bindsym $mod+Alt+n exec "whonix-run"
     bindsym $mod+d exec "steam"
     bindsym $mod+c exec "keepassxc"
     bindsym $mod+v exec "pavucontrol"
+    bindsym $mod+n exec "whonix-run"
+	bindsym $mod+t exec swaync-client -t
+	bindsym $mod+Shift+t exec swaync-client -C
 
-#
 # Layout stuff:
-#
     # You can "split" the current object of your focus with
     # $mod+b or $mod+v, for horizontal and vertical splits
     # respectively.
@@ -213,9 +197,8 @@ bindgesture swipe:left move right
 
     # Move focus to the parent container
     bindsym $mod+a focus parent
-#
-# Scratchpad: (NOT USED)
-#
+
+# Scratchpad:
     # Sway has a "scratchpad", which is a bag of holding for windows.
     # You can send windows there and get them back later.
 
@@ -226,36 +209,32 @@ bindgesture swipe:left move right
     # If there are multiple scratchpad windows, this command cycles through them.
     bindsym $mod+minus scratchpad show
 
-#
 # Resizing containers:
-#
-mode "resize" {
-    # left will shrink the containers width
-    # right will grow the containers width
-    # up will shrink the containers height
-    # down will grow the containers height
-    bindsym $left resize shrink width 10px
-    bindsym $down resize grow height 10px
-    bindsym $up resize shrink height 10px
-    bindsym $right resize grow width 10px
+	bindsym $mod+Shift+r mode "resize"
+	mode "resize" {
+		# left will shrink the containers width
+		bindsym $left resize shrink width 10px
+		# down will grow the containers height
+		bindsym $down resize grow height 10px
+		# up will shrink the containers height
+		bindsym $up resize shrink height 10px
+		# right will grow the containers width
+		bindsym $right resize grow width 10px
 
-    # Ditto, with arrow keys
-    bindsym Left resize shrink width 10px
-    bindsym Down resize grow height 10px
-    bindsym Up resize shrink height 10px
-    bindsym Right resize grow width 10px
+		# Ditto, with arrow keys
+		bindsym Left resize shrink width 10px
+		bindsym Down resize grow height 10px
+		bindsym Up resize shrink height 10px
+		bindsym Right resize grow width 10px
 
-    bindsym $mod+$move+minus scratchpad show
+		# Return to default mode
+		bindsym Return mode "default"
+		bindsym Escape mode "default"
+	}
 
-    # Return to default mode
-    bindsym Return mode "default"
-    bindsym Escape mode "default"
-}
+exec swaymsg workspace 0
 
-bindsym $mod+Shift+r mode "resize"
-
-bindsym $mod+t exec swaync-client -t
-bindsym $mod+Alt+t exec swaync-client -C
+exec sudo light -I
 
 exec_always wl-paste -t text --watch clipman store
 exec_always wl-paste -p -t text --watch clipman store -P --histpath="~/.local/share/clipman-primary.json"

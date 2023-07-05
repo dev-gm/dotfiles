@@ -20,7 +20,7 @@
 
 (use-service-modules base networking cups dbus authentication virtualization desktop syncthing admin pm vpn games)
 
-(use-package-modules base linux admin certs nvi gl vulkan video vpn)
+(use-package-modules base linux admin certs nvi gl vulkan video vpn freedesktop)
 
 (set! *random-state* (random-state-from-platform))
 
@@ -109,8 +109,7 @@
 root ALL=(ALL) ALL
 %wheel ALL=(ALL) ALL
 " %primary-username " ALL=(ALL) "
-"NOPASSWD: /home/" %primary-username
-"/.guix-home/profile/bin/light")))
+"NOPASSWD: /run/current-system/profile/bin/light")))
 
 (define %mapped-devices
   (list (mapped-device
@@ -139,7 +138,7 @@ root ALL=(ALL) ALL
 
 (define %packages (append
 					(list nvi mesa vulkan-loader intel-media-driver intel-vaapi-driver libva
-						  nss-certs wpa-supplicant bluez wireguard-tools)
+						  nss-certs wpa-supplicant bluez wireguard-tools light fprintd)
 					%base-packages))
 
 (define %iptables-rules
@@ -177,14 +176,14 @@ COMMIT
 	(addresses addresses)
 	(dns (list %mullvad-dns))
 	(private-key "/etc/wireguard/private.key")
-	(post-up (if kill-switch
-			   '("iptables -I OUTPUT ! -o %i -m mark ! --mark $(wg show %i fwmark) -m addrtype ! --dst-type LOCAL -j REJECT"
-				 "ip6tables -I OUTPUT ! -o %i -m mark ! --mark $(wg show %i fwmark) -m addrtype ! --dst-type LOCAL -j REJECT")
-			   '()))
-	(pre-down (if kill-switch
-				'("iptables -D OUTPUT ! -o %i -m mark ! --mark $(wg show %i fwmark) -m addrtype ! --dst-type LOCAL -j REJECT"
-				  "ip6tables -D OUTPUT ! -o %i -m mark ! --mark $(wg show %i fwmark) -m addrtype ! --dst-type LOCAL -j REJECT")
-				'()))
+	;(post-up (if kill-switch
+	;		   '(("iptables -I OUTPUT ! -o %i -m mark ! --mark $(wg show %i fwmark) -m addrtype ! --dst-type LOCAL -j REJECT")
+	;			 ("ip6tables -I OUTPUT ! -o %i -m mark ! --mark $(wg show %i fwmark) -m addrtype ! --dst-type LOCAL -j REJECT"))
+	;		   '()))
+	;(pre-down (if kill-switch
+	;			'(("iptables -D OUTPUT ! -o %i -m mark ! --mark $(wg show %i fwmark) -m addrtype ! --dst-type LOCAL -j REJECT")
+	;			  ("ip6tables -D OUTPUT ! -o %i -m mark ! --mark $(wg show %i fwmark) -m addrtype ! --dst-type LOCAL -j REJECT"))
+	;			'()))
 	(peers
 	  (list
 		(wireguard-peer
@@ -255,6 +254,7 @@ COMMIT
 								   (libvirt-configuration
 									 (unix-sock-group "libvirt")))
 						  (service virtlog-service-type)
+						  ;(service fprintd-service-type)
 						  (service joycond-service-type)
 						  (service unattended-upgrade-service-type)
 						  (udev-rules-service 'solaar %solaar-udev-rules))

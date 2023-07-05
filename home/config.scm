@@ -22,10 +22,10 @@
 			 (guix inferior)
 			 (srfi srfi-1))
 
-(use-package-modules wm admin xdisorg terminals networking
+(use-package-modules wm admin xdisorg terminals networking bittorrent
+					 password-utils pciutils fonts ebook vim ocaml
 					 chromium audio pulseaudio video web-browsers
-					 password-utils pciutils fonts ebook vim
-					 gnome-xyz xorg qt linux vnc)
+					 gnome-xyz xorg qt linux vnc vim)
 
 (define %username "gavin")
 (define %email "github@gavinm.us")
@@ -95,31 +95,6 @@
 	   (inferior-for-channels channels)))
 	(first (lookup-inferior-packages inferior "firefox-wayland"))))
 
-;(define emacs-pgtk-native-comp
-;  (let*
-;	((channels
-;	   (list (channel
-;			   (name 'flat)
-;			   (url "https://github.com/flatwhatson/guix-channel.git")
-;			   (branch "master")
-;			   (introduction
-;				 (make-channel-introduction
-;				   "33f86a4b48205c0dc19d7c036c85393f0766f806"
-;				   (openpgp-fingerprint
-;					 "736A C00E 1254 378B A982  7AF6 9DBE 8265 81B6 4490"))))
-;			 (channel
-;			   (name 'guix)
-;			   (url "https://git.savannah.gnu.org/git/guix.git")
-;			   (branch "master")
-;			   (introduction
-;				 (make-channel-introduction
-;				   "9edb3f66fd807b096b48283debdcddccfea34bad"
-;				   (openpgp-fingerprint
-;					 "BBB0 2DDF 2CEA F6A8 0D1D  E643 A2A0 6DF2 A33A 54FA"))))))
-;	 (inferior
-;	   (inferior-for-channels channels)))
-;	(first (lookup-inferior-packages inferior "emacs-pgtk-native-comp"))))
-
 (define %packages
   (list font-adobe-source-code-pro font-adobe-source-sans-pro
 		font-awesome font-dejavu font-fira-code font-go
@@ -127,14 +102,12 @@
 		McMojave-cursors materia-theme kvantum
 		sway bemenu waybar swaylock swaynotificationcenter
 		xorg-server-xwayland qtwayland-5
-		grimshot clipman wl-clipboard light solaar
+		grimshot clipman wl-clipboard solaar
 		blueman wireplumber pipewire pulseaudio pavucontrol
-		prismlauncher steam
-		firefox/wayland-114 qutebrowser
-		alacritty neovim ;emacs-pgtk-native-comp
-		keepassxc calibre obs obs-wlrobs signal-desktop
-		tigervnc-client
-		local-utils))
+		prismlauncher steam firefox/wayland-114 qutebrowser
+		alacritty vim neovim obs obs-wlrobs
+		signal-desktop keepassxc calibre deluge tigervnc-client
+		opam local-utils))
 
 (define %bash-profile
   (string-append
@@ -223,7 +196,7 @@ style=" %theme "
 
 (define %xdg-config-files
   `(("sway/config" ,(local-file "sway/config"))
-	("sway/blobs-d.svg" ,(local-file "sway/blobs-d.svg"))
+	("sway/blobs-d.png" ,(local-file "sway/blobs-d.png"))
 	("nvim/init.vim" ,(local-file "nvim/init.vim"))
 	("waybar/config" ,(local-file "waybar/config"))
 	("waybar/style.css" ,(local-file "waybar/style.css"))
