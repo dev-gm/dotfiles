@@ -10,6 +10,11 @@
 			 (guix inferior)
 			 (guix download)
 			 (guix packages)
+			 (guix licenses)
+			 (guix utils)
+			 (guix build utils)
+			 (guix build-system copy)
+			 (guix build gnu-build-system)
 			 (nongnu packages firmware)
 			 (nongnu packages fonts)
 			 (nongnu packages video)
@@ -20,7 +25,7 @@
 
 (use-service-modules base networking cups dbus authentication virtualization desktop syncthing admin pm vpn games)
 
-(use-package-modules base linux admin certs nvi gl vulkan video vpn freedesktop)
+(use-package-modules base linux admin certs nvi gl vulkan video vpn freedesktop cpio compression)
 
 (set! *random-state* (random-state-from-platform))
 
@@ -128,6 +133,13 @@ root ALL=(ALL) ALL
 								(mount-point "/boot/efi")
 								(type "vfat")))
 						%base-file-systems))
+
+(define %swap-devices
+  (list
+	(swap-space
+	  (target "/swapfile")
+	  (dependencies (filter (file-system-mount-point-predicate "/")
+							%file-systems)))))
 
 (define %hosts-file (origin
 					  (uri "https://raw.githubusercontent.com/StevenBlack/hosts/master/hosts")
@@ -288,6 +300,7 @@ COMMIT
 
   (mapped-devices %mapped-devices)
   (file-systems %file-systems)
+  (swap-devices %swap-devices)
 
   (packages %packages)
   (services %services))
