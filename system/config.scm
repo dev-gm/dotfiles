@@ -1,31 +1,35 @@
 (use-modules (gnu)
-			 (gnu system keyboard)
-			 (gnu system mapped-devices)
-			 (gnu system file-systems)
-			 (gnu system linux-initrd)
 			 (gnu bootloader)
 			 (gnu bootloader grub)
-			 (guix gexp)
-			 (guix channels)
-			 (guix inferior)
-			 (guix download)
-			 (guix packages)
-			 (guix licenses)
-			 (guix utils)
+			 ((gnu home-services-utils)
+			  #:select (ini-config?
+						 maybe-object->string
+						 generic-serialize-ini-config))
+			 (gnu system file-systems)
+			 (gnu system keyboard)
+			 (gnu system linux-initrd)
+			 (gnu system mapped-devices)
 			 (guix build utils)
 			 (guix build-system copy)
 			 (guix build gnu-build-system)
+			 (guix channels)
+			 (guix download)
+			 (guix gexp)
+			 (guix inferior)
+			 (guix licenses)
+			 (guix packages)
+			 (guix utils)
 			 (nongnu packages firmware)
 			 (nongnu packages fonts)
-			 (nongnu packages video)
 			 (nongnu packages linux)
+			 (nongnu packages video)
 			 (nongnu system linux-initrd)
 			 (ice-9 textual-ports)
 			 (srfi srfi-1))
 
-(use-service-modules base networking cups dbus authentication virtualization desktop syncthing admin pm vpn games)
+(use-service-modules admin authentication base configuration cups dbus desktop games networking pm shepherd syncthing virtualization vpn)
 
-(use-package-modules base linux admin certs nvi gl vulkan video vpn freedesktop cpio compression)
+(use-package-modules admin base certs compression cpio dns freedesktop gl networking ntp nvi linux video vpn vulkan)
 
 (set! *random-state* (random-state-from-platform))
 
@@ -150,8 +154,80 @@ root ALL=(ALL) ALL
 
 (define %packages (append
 					(list nvi mesa vulkan-loader intel-media-driver intel-vaapi-driver libva
-						  nss-certs wpa-supplicant bluez wireguard-tools light fprintd)
+						  nss-certs iwd openntpd openresolv bluez wireguard-tools light)
 					%base-packages))
+
+(define (serialize-ini-config config)
+  (define (serialize-val val)
+	(cond
+	  ((boolean? val) (if val "true" "false"))
+	  ((list? val) (string-join (map serialize-val val) ","))
+	  ((or (number? val) (symbol? val)) (maybe-object->string val))
+	  (else val)))
+
+  (define (serialize-field key val)
+	(let ((val (serialize-val val))
+		  (key (symbol->string key)))
+	  (list key " = " val "\n")))
+
+  (generic-serialize-ini-config
+	#:combine-ini (compose flatten interpose)
+	#:combine-alist list
+	#:combine-section-alist cons
+	#:serialize-field serialize-field
+	#:fields config))
+
+(define-configuration/no-serialization iwd-configuration
+									   (package (package iwd) "")
+									   (config (ini-config '()) ""))
+
+(define (iwd-shepherd-service cfg)
+  (match-record cfg <iwd-configuration>
+				(package)
+				(let ((environment #~(list (string-append
+											 "PATH="
+											 (string-append #$openresolv "/sbin")
+											 ":"
+											 (string-append #$coreutils "/bin")))))
+				  (list
+					(shepherd-service
+					  (documentation "Run iwd")
+					  (provision '(iwd))
+					  (requirement '(user-processes dbus-system loopback))
+					  (start #~(make-forkexec-constructor
+								 (list (string-append #$package "/libexec/iwd"))
+								 #:log-file "/var/log/iwd.log"
+								 #:environment-variables #$environment))
+					  (stop #~(make-kill-destructor)))))))
+
+(define (iwd-etc-service cfg)
+  (match-record cfg <iwd-configuration>
+				(config)
+				`(("iwd/main.conf"
+				   ,(apply mixed-text-file
+						   "main.conf"
+						   (serialize-ini-config config))))))
+
+(define add-iwd-package (compose list iwd-configuration-package))
+
+(define iwd-service-type
+  (service-type
+	(name 'iwd)
+	(extensions
+	  (list (service-extension
+			  shepherd-root-service-type
+			  iwd-shepherd-service)
+			(service-extension
+			  dbus-root-service-type
+			  add-iwd-package)
+			(service-extension
+			  etc-service-type
+			  iwd-etc-service)
+			(service-extension
+			  profile-service-type
+			  add-iwd-package)))
+	(default-value (iwd-configuration))
+	(description "")))
 
 (define %iptables-rules
   (plain-file "iptables.rules"
@@ -188,14 +264,6 @@ COMMIT
 	(addresses addresses)
 	(dns (list %mullvad-dns))
 	(private-key "/etc/wireguard/private.key")
-	;(post-up (if kill-switch
-	;		   '(("iptables -I OUTPUT ! -o %i -m mark ! --mark $(wg show %i fwmark) -m addrtype ! --dst-type LOCAL -j REJECT")
-	;			 ("ip6tables -I OUTPUT ! -o %i -m mark ! --mark $(wg show %i fwmark) -m addrtype ! --dst-type LOCAL -j REJECT"))
-	;		   '()))
-	;(pre-down (if kill-switch
-	;			'(("iptables -D OUTPUT ! -o %i -m mark ! --mark $(wg show %i fwmark) -m addrtype ! --dst-type LOCAL -j REJECT")
-	;			  ("ip6tables -D OUTPUT ! -o %i -m mark ! --mark $(wg show %i fwmark) -m addrtype ! --dst-type LOCAL -j REJECT"))
-	;			'()))
 	(peers
 	  (list
 		(wireguard-peer
@@ -231,16 +299,16 @@ COMMIT
 		  "1j2hizasd9303783ay7n2aymx12l3kk2jijcmn4dwczlk900h4ci")))))
 
 (define %services (append
-					(list (service wpa-supplicant-service-type)
-						  (service network-manager-service-type)
+					(list (service iwd-service-type
+								   (iwd-configuration
+									 (config '(("NameResolvingService" . "resolvconf")
+											   ("DisablePeriodicScan" . #t)))))
 						  (service iptables-service-type
 								   (iptables-configuration
 									 (ipv4-rules %iptables-rules)
 									 (ipv6-rules %ip6tables-rules)))
 						  (service wireguard-service-type
 								   %wireguard-configuration)
-						  (service openntpd-service-type
-								   (openntpd-configuration))
 						  (service syncthing-service-type
 								   (syncthing-configuration
 									 (user %primary-username)
@@ -249,7 +317,8 @@ COMMIT
 								   (elogind-configuration
 									 (handle-lid-switch 'suspend)
 									 (handle-lid-switch-docked 'ignore)
-									 (handle-lid-switch-external-power 'ignore)))
+									 (handle-lid-switch-external-power 'ignore)
+									 (suspend-state "mem")))
 						  (service bluetooth-service-type
 								   (bluetooth-configuration
 									 (name "Laptop")))
@@ -266,9 +335,6 @@ COMMIT
 								   (libvirt-configuration
 									 (unix-sock-group "libvirt")))
 						  (service virtlog-service-type)
-						  ;(service fprintd-service-type)
-						  (service joycond-service-type)
-						  (service unattended-upgrade-service-type)
 						  (udev-rules-service 'solaar %solaar-udev-rules))
 					(modify-services %base-services
 									 (guix-service-type config =>
@@ -279,7 +345,18 @@ COMMIT
 																	%default-substitute-urls))
 														  (authorized-keys
 															(append (list (local-file "nonguix/signing-key.pub"))
-																	%default-authorized-guix-keys)))))))
+																	%default-authorized-guix-keys))))
+									 (sysctl-service-type config =>
+														  (sysctl-configuration
+															(settings (append '(("net.ipv6.conf.all.use_tempaddr" . "2")
+																				("net.ipv6.conf.default.use_tempaddr" . "2")
+																				("net.ipv6.conf.nic.use_tempaddr" . "2"))))))
+									 (mingetty-service-type config =>
+															(if (string=? (mingetty-configuration-tty config) "tty1")
+															  (mingetty-configuration
+																(inherit config)
+																(auto-login %primary-username))
+															  config)))))
 
 (operating-system
   (host-name "laptop.gavinm.us")
