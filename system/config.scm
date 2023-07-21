@@ -1,10 +1,7 @@
 (use-modules (gnu)
 			 (gnu bootloader)
 			 (gnu bootloader grub)
-			 ((gnu home-services-utils)
-			  #:select (ini-config?
-						 maybe-object->string
-						 generic-serialize-ini-config))
+			 (gnu home services utils)
 			 (gnu system file-systems)
 			 (gnu system keyboard)
 			 (gnu system linux-initrd)
@@ -18,6 +15,7 @@
 			 (guix inferior)
 			 (guix licenses)
 			 (guix packages)
+			 (guix records)
 			 (guix utils)
 			 (nongnu packages firmware)
 			 (nongnu packages fonts)
@@ -25,9 +23,10 @@
 			 (nongnu packages video)
 			 (nongnu system linux-initrd)
 			 (ice-9 textual-ports)
-			 (srfi srfi-1))
+			 (srfi srfi-1)
+			 (srfi srfi-171))
 
-(use-service-modules admin authentication base configuration cups dbus desktop games networking pm shepherd syncthing virtualization vpn)
+(use-service-modules admin authentication base configuration cups dbus desktop games networking pm shepherd syncthing sysctl virtualization vpn)
 
 (use-package-modules admin base certs compression cpio dns freedesktop gl networking ntp nvi linux video vpn vulkan)
 
@@ -100,15 +99,13 @@
 					   (name %primary-username)
 					   (group %primary-username)
 					   (supplementary-groups '("wheel" "audio" "video" "netdev"
-											   "network" "dialout" "kvm" "libvirt"
-											   "audio" "video" "adbusers")))
+											   "dialout" "kvm" "libvirt" "audio"
+											   "video" "adbusers")))
 					 %base-user-accounts))
 
 (define %groups (append (list (user-group
 								(name %primary-username)
 								(id 1000))
-							  (user-group
-								(name "network"))
 							  (user-group
 								(name "adbusers")))
 						%base-groups))
@@ -164,26 +161,27 @@ root ALL=(ALL) ALL
 	  ((list? val) (string-join (map serialize-val val) ","))
 	  ((or (number? val) (symbol? val)) (maybe-object->string val))
 	  (else val)))
-
   (define (serialize-field key val)
 	(let ((val (serialize-val val))
 		  (key (symbol->string key)))
 	  (list key " = " val "\n")))
-
-  (generic-serialize-ini-config
-	#:combine-ini (compose flatten interpose)
-	#:combine-alist list
-	#:combine-section-alist cons
-	#:serialize-field serialize-field
-	#:fields config))
+  (define* (concat-alist serialize li)
+		   (generic-serialize-alist
+			 (lambda* (#:rest r)
+					  (string-concatenate
+						(list-transduce tflatten rcons r)))
+			 serialize li))
+  (define (serialize-section key val)
+	(list "[" (symbol->string key) "]\n" (concat-alist serialize-field val)))
+  (concat-alist serialize-section config))
 
 (define-configuration/no-serialization iwd-configuration
-									   (package (package iwd) "")
-									   (config (ini-config '()) ""))
+									   (iwd (package iwd) "")
+									   (config (alist '()) ""))
 
 (define (iwd-shepherd-service cfg)
   (match-record cfg <iwd-configuration>
-				(package)
+				(iwd)
 				(let ((environment #~(list (string-append
 											 "PATH="
 											 (string-append #$openresolv "/sbin")
@@ -192,10 +190,10 @@ root ALL=(ALL) ALL
 				  (list
 					(shepherd-service
 					  (documentation "Run iwd")
-					  (provision '(iwd))
+					  (provision '(iwd networking))
 					  (requirement '(user-processes dbus-system loopback))
 					  (start #~(make-forkexec-constructor
-								 (list (string-append #$package "/libexec/iwd"))
+								 (list (string-append #$iwd "/libexec/iwd"))
 								 #:log-file "/var/log/iwd.log"
 								 #:environment-variables #$environment))
 					  (stop #~(make-kill-destructor)))))))
@@ -204,11 +202,9 @@ root ALL=(ALL) ALL
   (match-record cfg <iwd-configuration>
 				(config)
 				`(("iwd/main.conf"
-				   ,(apply mixed-text-file
-						   "main.conf"
-						   (serialize-ini-config config))))))
+				   ,(plain-file "main.conf" (serialize-ini-config config))))))
 
-(define add-iwd-package (compose list iwd-configuration-package))
+(define add-iwd-package (compose list iwd-configuration-iwd))
 
 (define iwd-service-type
   (service-type
@@ -301,8 +297,9 @@ COMMIT
 (define %services (append
 					(list (service iwd-service-type
 								   (iwd-configuration
-									 (config '(("NameResolvingService" . "resolvconf")
-											   ("DisablePeriodicScan" . #t)))))
+									 (config '((General .  ((EnableNetworkConfiguration . #t)))
+											   (Network . ((NameResolvingService . "resolvconf")))
+											   (Scan . ((DisablePeriodicScan . #t)))))))
 						  (service iptables-service-type
 								   (iptables-configuration
 									 (ipv4-rules %iptables-rules)
@@ -318,7 +315,7 @@ COMMIT
 									 (handle-lid-switch 'suspend)
 									 (handle-lid-switch-docked 'ignore)
 									 (handle-lid-switch-external-power 'ignore)
-									 (suspend-state "mem")))
+									 (suspend-state '("mem"))))
 						  (service bluetooth-service-type
 								   (bluetooth-configuration
 									 (name "Laptop")))
@@ -348,15 +345,14 @@ COMMIT
 																	%default-authorized-guix-keys))))
 									 (sysctl-service-type config =>
 														  (sysctl-configuration
+															(inherit config)
 															(settings (append '(("net.ipv6.conf.all.use_tempaddr" . "2")
 																				("net.ipv6.conf.default.use_tempaddr" . "2")
 																				("net.ipv6.conf.nic.use_tempaddr" . "2"))))))
 									 (mingetty-service-type config =>
-															(if (string=? (mingetty-configuration-tty config) "tty1")
-															  (mingetty-configuration
-																(inherit config)
-																(auto-login %primary-username))
-															  config)))))
+															(mingetty-configuration
+															  (inherit config)
+															  (auto-login %primary-username))))))
 
 (operating-system
   (host-name "laptop.gavinm.us")

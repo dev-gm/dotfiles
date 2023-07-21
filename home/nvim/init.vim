@@ -130,6 +130,7 @@ lspconfig.clangd.setup{ capabilities = capabilities }
 lspconfig.rust_analyzer.setup{ capabilities = capabilities }
 lspconfig.vls.setup{ capabilities = capabilities }
 lspconfig.ocamllsp.setup{ capabilities = capabilities }
+lspconfig.arduino_language_server.setup{ capabilities = capabilities }
 
 local cmp = require('cmp')
 local types = require('cmp.types')

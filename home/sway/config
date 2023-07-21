@@ -79,7 +79,9 @@ bindgesture swipe:right focus right
 bindgesture swipe:left focus left
 
 for_window [app_id="Picture-in-Picture"] floating enable, sticky enable, resize set width 120 height 90
-for_window [title="Picture-in-Picture"] floating enable, sticky enable
+for_window [title="Picture-in-Picture"] floating enable, sticky enable, resize set width 120 height 90
+for_window [app_id="iwgtk"] floating enable, sticky enable
+for_window [title="iwgtk"] floating enable, sticky enable
 for_window [window_role="pop-up"] floating enable
 for_window [window_role="bubble"] floating enable
 for_window [window_role="task_dialog"] floating enable
@@ -171,7 +173,7 @@ for_window [title="Wine System Tray"] kill
     bindsym $mod+v exec "pavucontrol"
     bindsym $mod+n exec "whonix-run"
 	bindsym $mod+t exec swaync-client -t
-	bindsym $mod+Shift+t exec swaync-client -C
+	bindsym $mod+Shift+t exec swaync-client -d
 
 # Layout stuff:
     # You can "split" the current object of your focus with
@@ -236,19 +238,17 @@ exec swaymsg workspace 0
 
 exec sudo light -I
 
-exec_always wl-paste -t text --watch clipman store
 exec_always wl-paste -p -t text --watch clipman store -P --histpath="~/.local/share/clipman-primary.json"
+
+exec_always iwgtk -i
 
 exec_always blueman-applet
 
 exec_always swaync
 
-exec_always wireplumber
-
-exec_always keepassxc "/home/gavin/sync/passwords/Database.kdbx"
+exec sleep 0.5s && keepassxc "/home/gavin/sync/passwords/Database.kdbx"
 
 exec solaar -w hide
 
-bar {
-    swaybar_command waybar
-}
+exec waybar
+

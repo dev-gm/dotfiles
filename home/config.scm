@@ -9,6 +9,7 @@
 			 (nongnu packages messaging)
 			 (nongnu packages fonts)
 			 (games packages minecraft)
+			 (guix build-system meson)
 			 (guix build-system copy)
 			 (guix build copy-build-system)
 			 (guix utils)
@@ -23,31 +24,20 @@
 			 (srfi srfi-1))
 
 (use-package-modules wm admin xdisorg terminals networking bittorrent
-					 password-utils pciutils fonts ebook vim ocaml
-					 chromium audio pulseaudio video web-browsers
-					 gnome-xyz xorg qt linux vnc vim)
+					 password-utils pciutils fonts ebook vim ocaml gnome
+					 chromium audio pulseaudio video web-browsers gnome-xyz
+					 gnome-xyz xorg qt linux vnc vim aidc gtk man pkg-config)
 
 (define %username "gavin")
 (define %email "github@gavinm.us")
 (define %name "Gavin Mason")
 (define %theme "Materia-dark-compact")
+(define %icon-theme "Papirus-Dark")
 (define %cursor "McMojave-cursors")
 (define %cursor-size 18)
 (define %font "Dejavu Sans 11")
 (define %dark-theme #t)
 (define %opam-feature #t)
-
-(define local-utils
-  (package
-	(name "local-utils")
-	(build-system copy-build-system)
-	(source (local-file "utils" #:recursive? #t))
-	(arguments `(#:install-plan '(("." "bin"))))
-	(version "1.0")
-	(synopsis "local utils")
-	(description "local utils")
-	(home-page "https://github.com/dev-gm/dotfiles")
-	(license gpl3)))
 
 (define McMojave-cursors
   (package
@@ -67,6 +57,25 @@
 	(description "McMojave cursors")
 	(home-page "https://github.com/vinceliuice/McMojave-cursors")
 	(license gpl3)))
+
+(define iwgtk
+  (package
+	(name "iwgtk")
+	(version "0.9")
+	(source (origin
+			  (uri (string-append "https://github.com/J-Lentz/iwgtk/archive/refs/tags/v" version ".tar.gz"))
+			  (method url-fetch)
+			  (sha256
+				(base32
+				  "0c9xb08g83qp75s55nql84zkbhbmx508h52xlqs60lzy633jva44"))))
+	(native-inputs (list scdoc pkg-config))
+	(inputs (list iwd gtk qrencode))
+	(build-system meson-build-system)
+	(description "iwgtk is a wireless networking GUI for Linux. It is a front-end for iwd (iNet Wireless Daemon), with supported functionality similar to that of iwctl. Features include viewing and connecting to available networks, managing known networks, provisioning new networks via WPS or Wi-Fi Easy Connect, and an indicator (tray) icon displaying connection status and signal strength.")
+	(synopsis "Lightweight wireless networking GUI (front-end for iwd)")
+	(home-page "https://github.com/J-Lentz/iwgtk")
+	(license gpl3+)))
+
 
 (define firefox/wayland-114
   (let*
@@ -95,18 +104,31 @@
 	   (inferior-for-channels channels)))
 	(first (lookup-inferior-packages inferior "firefox-wayland"))))
 
+(define local-utils
+  (package
+	(name "local-utils")
+	(build-system copy-build-system)
+	(source (local-file "utils" #:recursive? #t))
+	(arguments `(#:install-plan '(("." "bin"))))
+	(version "1.0")
+	(synopsis "local utils")
+	(description "local utils")
+	(home-page "https://github.com/dev-gm/dotfiles")
+	(license gpl3)))
+
 (define %packages
   (list font-adobe-source-code-pro font-adobe-source-sans-pro
 		font-awesome font-dejavu font-fira-code font-go
 		font-google-noto-emoji font-microsoft-web-core-fonts
-		McMojave-cursors materia-theme kvantum
+		papirus-icon-theme McMojave-cursors materia-theme kvantum
 		sway bemenu waybar swaylock swaynotificationcenter
 		xorg-server-xwayland qtwayland-5
 		grimshot clipman wl-clipboard solaar
-		blueman wireplumber pipewire pulseaudio pavucontrol
+		iwgtk blueman
+		wireplumber pipewire pulseaudio pavucontrol
 		prismlauncher steam firefox/wayland-114 qutebrowser
 		alacritty vim neovim obs obs-wlrobs
-		signal-desktop keepassxc calibre deluge tigervnc-client
+		signal-desktop keepassxc calibre deluge tigervnc-client baobab
 		opam local-utils))
 
 (define %bash-profile
@@ -114,7 +136,7 @@
 (if %opam-feature
   "eval $(opam env)\n"
   "")
-"export PATH=\"$PATH:/home/" %username "/.local/bin/\"
+"export PATH=\"$PATH:/home/" %username "/.local/bin:/home/" %username "/.go/bin\"
 if [ \"$(tty)\" = \"/dev/tty1\" ]; then
 	dbus-run-session sway
 fi"))
@@ -125,16 +147,19 @@ fi"))
   (string-append
 "gtk-theme-name = \"" %theme "\"
 gtk-cursor-theme-name = \"" %cursor "\"
+gtk-cursor-theme-size = \"" (number->string %cursor-size) "\"
 gtk-font-name = \"" %font "\"
+gtk-icon-theme-name = \"" %icon-theme "\"
 "))
 
-(define %gtk3-config
+(define %gtk3-and-4-config
   (string-append
 "[Settings]
 gtk-theme-name = " %theme "
 gtk-cursor-theme-name = " %cursor "
 gtk-cursor-theme-size = " (number->string %cursor-size) "
 gtk-font-name = " %font "
+gtk-icon-theme-name = " %icon-theme "
 "(if %dark-theme
 	"gtk-application-prefer-dark-theme = true\n"
 	"")))
@@ -149,6 +174,7 @@ style=" %theme "
    `(("XDG_DATA_DIRS" . ,(string-append "/home/" %username "/.guix-home/profile/share"))
 	 ("XDG_CURRENT_DESKTOP" . "sway")
 	 ("XDG_SESSION_TYPE" . "wayland")
+	 ("GTK_THEME" . ,%theme)
 	 ("QT_SCALE_FACTOR" . "1")
 	 ("QT_QPA_PLATFORM" . "wayland")
 	 ("QT_STYLE_OVERRIDE" . "kvantum")
@@ -157,7 +183,8 @@ style=" %theme "
 	 ("ELM_ENGINE" . "wayland_egl")
 	 ("ECORE_EVAS_ENGINE" . "wayland-egl")
 	 ("GDK_BACKEND" . "wayland")
-	 ("_JAVA_AWT_WM_NONREPARENTING" . "1")))
+	 ("_JAVA_AWT_WM_NONREPARENTING" . "1")
+	 ("GOPATH" . ,(string-append "/home/" %username "/.go"))))
 
 (define %kvantum-config "theme=MateriaDark")
 
@@ -201,7 +228,8 @@ style=" %theme "
 	("waybar/config" ,(local-file "waybar/config"))
 	("waybar/style.css" ,(local-file "waybar/style.css"))
 	("alacritty/alacritty.yml" ,(local-file "alacritty/alacritty.yml"))
-	("gtk-3.0/settings.ini" ,(plain-file "settings.ini" %gtk3-config))
+	("gtk-3.0/settings.ini" ,(plain-file "settings.ini" %gtk3-and-4-config))
+	("gtk-4.0/settings.ini" ,(plain-file "settings.ini" %gtk3-and-4-config))
 	("Kvantum/kvantum.kvconfig" ,(plain-file "kvantum.kvconfig" %kvantum-config))
 	("Kvantum/MateriaDark/MateriaDark.kvconfig" ,%kvantum-MateriaDark-config-file)
 	("Kvantum/MateriaDark/MateriaDark.svg" ,%kvantum-MateriaDark-svg-file)
@@ -212,7 +240,8 @@ style=" %theme "
   `((".local/share/nvim/site/autoload/plug.vim" ,%vim-plug-file)
 	(".vimrc" ,(local-file "vim/vimrc"))
 	(".gitconfig" ,(plain-file "gitconfig" %gitconfig-file))
-	(".gtkrc-2.0" ,(plain-file "gtkrc-2.0" %gtk2-config))))
+	(".gtkrc-2.0" ,(plain-file "gtkrc-2.0" %gtk2-config))
+	(".arduino15/arduino-cli.yaml" ,(local-file "arduino15/arduino-cli.yaml"))))
 
 (define %extra-channels
   (list (channel
