@@ -114,8 +114,9 @@
   (plain-file "sudoers" (string-append "\
 root ALL=(ALL) ALL
 %wheel ALL=(ALL) ALL
-" %primary-username " ALL=(ALL) "
-"NOPASSWD: /run/current-system/profile/bin/light")))
+" %primary-username " ALL=(ALL) NOPASSWD: /run/current-system/profile/bin/light
+" %primary-username " ALL=(ALL) NOPASSWD: /run/current-system/profile/bin/herd stop wireguard-wg0
+" %primary-username " ALL=(ALL) NOPASSWD: /run/current-system/profile/bin/herd restart wireguard-wg0")))
 
 (define %mapped-devices
   (list (mapped-device
@@ -253,13 +254,13 @@ COMMIT
 
 (define %mullvad-dns "100.64.0.7")
 
-(define %mullvad-kill-switch #t)
-
-(define (make-mullvad-wireguard-configuration name addresses endpoint public-key kill-switch)
+(define (make-mullvad-wireguard-configuration name addresses endpoint public-key)
   (wireguard-configuration
 	(addresses addresses)
 	(dns (list %mullvad-dns))
 	(private-key "/etc/wireguard/private.key")
+	(post-up `(,(string-append "echo -n " %mullvad-server-type " > /var/lib/mullvad-status")))
+	(pre-down '("echo > /var/lib/mullvad-status"))
 	(peers
 	  (list
 		(wireguard-peer
@@ -282,7 +283,7 @@ COMMIT
 		   (addresses (string-split (second server) #\,))
 		   (endpoint (third server))
 		   (public-key (fourth server)))
-	  (make-mullvad-wireguard-configuration name addresses endpoint public-key %mullvad-kill-switch))))
+	  (make-mullvad-wireguard-configuration name addresses endpoint public-key))))
 
 (define %solaar-udev-rules
   (file->udev-rule

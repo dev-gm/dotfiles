@@ -69,6 +69,7 @@ Plug 'lewis6991/gitsigns.nvim'
 Plug 'airblade/vim-gitgutter'
 Plug 'Pocco81/auto-save.nvim'
 " Plug 'gpanders/nvim-parinfer'
+Plug 'edKotinsky/Arduino.nvim'
 Plug 'neovim/nvim-lspconfig'
 Plug 'hrsh7th/nvim-cmp'
 Plug 'hrsh7th/cmp-buffer'
@@ -130,7 +131,21 @@ lspconfig.clangd.setup{ capabilities = capabilities }
 lspconfig.rust_analyzer.setup{ capabilities = capabilities }
 lspconfig.vls.setup{ capabilities = capabilities }
 lspconfig.ocamllsp.setup{ capabilities = capabilities }
-lspconfig.arduino_language_server.setup{ capabilities = capabilities }
+
+local arduino = require('arduino')
+
+arduino.setup {
+	default_fqbn = "esp32:esp32:esp32da",
+    clangd = "/home/gavin/.guix-profile/bin/clangd",
+	arduino = "/home/gavin/.guix-profile/bin/arduino-cli",
+	arduino_config_dir = "/home/gavin/.arduino15"
+}
+
+lspconfig.arduino_language_server.setup{
+	on_new_config = arduino.on_new_config,
+	cmd = { "arduino-language-server", "-clangd", "/home/gavin/.guix-profile/bin/clangd", "-cli", "/home/gavin/.guix-profile/bin/arduino-cli" },
+	capabilities = capabilities
+}
 
 local cmp = require('cmp')
 local types = require('cmp.types')

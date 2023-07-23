@@ -106,7 +106,7 @@
 			"critical": 15
 		},
 		//"format": "BAT {capacity}%",
-		"format": "{icon}  {capacity}%",
+		"format": "{icon} {capacity}%",
 		"format-charging": "{icon}Z {capacity}%",
 		"format-critical": "{icon}  {capacity}%: {time}",
 		"format-alt": "{timeTo}",

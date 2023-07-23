@@ -173,7 +173,8 @@ for_window [title="Wine System Tray"] kill
     bindsym $mod+v exec "pavucontrol"
     bindsym $mod+n exec "whonix-run"
 	bindsym $mod+t exec swaync-client -t
-	bindsym $mod+Shift+t exec swaync-client -d
+	bindsym $mod+Shift+t exec swaync-client -C
+	bindsym $mod+Ctrl+t exec swaync-client -d
 
 # Layout stuff:
     # You can "split" the current object of your focus with
@@ -242,11 +243,13 @@ exec_always wl-paste -p -t text --watch clipman store -P --histpath="~/.local/sh
 
 exec_always iwgtk -i
 
+exec_always wireguard-tray
+
 exec_always blueman-applet
 
 exec_always swaync
 
-exec sleep 0.5s && keepassxc "/home/gavin/sync/passwords/Database.kdbx"
+exec sleep 1s && keepassxc "/home/gavin/sync/passwords/Database.kdbx"
 
 exec solaar -w hide
 
