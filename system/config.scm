@@ -48,7 +48,7 @@
 			   (name 'guix)
 			   (url "https://git.savannah.gnu.org/git/guix.git")
 			   (branch "master")
-			   (commit "669f0eaed6310233295fbd0a077afc9ce054c6ab")
+			   (commit "d0a2b422e06aab0cab3a10a47ef378602992577f")
 			   (introduction
 				 (make-channel-introduction
 				   "9edb3f66fd807b096b48283debdcddccfea34bad"
@@ -58,7 +58,7 @@
 			   (name 'nonguix)
 			   (url "https://gitlab.com/nonguix/nonguix")
 			   (branch "master")
-			   (commit "211635c8e024692c2b05d1af4c9c6a43b9fc0aa1")
+			   (commit "d44f0cde50ca96eabf6e7b0f0c9bdbd89508b790")
 			   (introduction
 				 (make-channel-introduction
 				   "897c1a470da759236cc11798f4e0a5f7d4d59fbc"
@@ -250,7 +250,7 @@ COMMIT
 
 ; /etc/wireguard/servers must contain all mullvad wireguard config files
 
-(define %mullvad-server-type "sg")
+(define %mullvad-server-type "us-nyc")
 
 (define %mullvad-dns "100.64.0.7")
 
@@ -298,7 +298,8 @@ COMMIT
 (define %services (append
 					(list (service iwd-service-type
 								   (iwd-configuration
-									 (config '((General .  ((EnableNetworkConfiguration . #t)))
+									 (config '((General .  ((AddressRandomization . "network")
+															(EnableNetworkConfiguration . #t)))
 											   (Network . ((NameResolvingService . "resolvconf")))
 											   (Scan . ((DisablePeriodicScan . #t)))))))
 						  (service iptables-service-type
@@ -349,11 +350,7 @@ COMMIT
 															(inherit config)
 															(settings (append '(("net.ipv6.conf.all.use_tempaddr" . "2")
 																				("net.ipv6.conf.default.use_tempaddr" . "2")
-																				("net.ipv6.conf.nic.use_tempaddr" . "2"))))))
-									 (mingetty-service-type config =>
-															(mingetty-configuration
-															  (inherit config)
-															  (auto-login %primary-username))))))
+																				("net.ipv6.conf.nic.use_tempaddr" . "2")))))))))
 
 (operating-system
   (host-name "laptop.gavinm.us")

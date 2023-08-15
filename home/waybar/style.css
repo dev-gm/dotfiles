@@ -1,5 +1,5 @@
 * {
-	font-size: 15px;
+	font-size: 14px;
 	font-family: monospace;
 }
 
@@ -16,6 +16,7 @@ window#waybar {
 #custom-left-arrow-light {
 	color: #292b2e;
 	background: rgba(26,26,26,1);
+	border: none;
 }
 
 #workspaces,
@@ -34,7 +35,7 @@ window#waybar {
 }
 
 #workspaces button {
-	padding: 0 2px;
+	padding: 0 1px;
 	color: #fdf6e3;
 }
 #workspaces button.focused {
@@ -47,7 +48,7 @@ window#waybar {
 #workspaces button:hover {
 	background: #1a1a1a;
 	border: #1a1a1a;
-	padding: 0 3px;
+	padding: 0 1px;
 }
 
 #backlight {
@@ -85,7 +86,7 @@ window#waybar {
 #battery,
 #disk,
 #custom-wattage {
-	padding: 0 10px;
+	padding: 0 8px;
 }
 
 #custom-notification {

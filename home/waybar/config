@@ -3,7 +3,6 @@
 {
 	"layer": "bottom",
 	"position": "bottom",
-
 	"modules-left": [
 		"custom/left-arrow-dark",
 		"sway/window",
@@ -44,7 +43,6 @@
 		"custom/left-arrow-dark",
 		"custom/notification"
 	],
-
 	"custom/left-arrow-dark": {
 		"format": "",
 		"tooltip": false
@@ -61,28 +59,23 @@
 		"format": "",
 		"tooltip": false
 	},
-
 	"backlight": {
 		"device": "intel_backlight",
 		"format": "SCRN {percent}%"
 	},
-
 	"temperature": {
 		"thermal-zone": 2,
 		"critical-threshold": 80,
         "format-critical": "TEMP {temperatureC}°C",
 		"format": "TEMP {temperatureC}°C",
 	},
-
 	"clock": {
-		//"timezone": "America/New_York",
-		"timezone": "Asia/Bangkok",
+		"timezone": "America/New_York",
 		"tooltip-format": "<big>{:%I:%M - %b %d}</big>\n<tt><small>{calendar}</small></tt>",
 		"interval": 1,
-		"format": "{:%I:%M:%S}",
+		"format": "{:%I:%M:%S %p}",
 		"format-alt": "{:%a, %b %d, %Y}"
 	},
-
 	"pulseaudio": {
 		"format": "{volume:2}%",
 		"format-bluetooth": "{icon}  {volume}%",
@@ -105,7 +98,6 @@
 			"warning": 30,
 			"critical": 15
 		},
-		//"format": "BAT {capacity}%",
 		"format": "{icon} {capacity}%",
 		"format-charging": "{icon}Z {capacity}%",
 		"format-critical": "{icon}  {capacity}%: {time}",

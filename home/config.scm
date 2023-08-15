@@ -12,6 +12,7 @@
 			 (guix build-system meson)
 			 (guix build-system copy)
 			 (guix build copy-build-system)
+			 (guix build utils)
 			 (guix utils)
 			 (guix packages)
 			 (guix channels)
@@ -23,10 +24,10 @@
 			 (guix inferior)
 			 (srfi srfi-1))
 
-(use-package-modules wm admin xdisorg terminals networking bittorrent
-					 password-utils pciutils fonts ebook vim ocaml gnome
-					 chromium audio pulseaudio video web-browsers gnome-xyz
-					 gnome-xyz xorg qt linux vnc vim aidc gtk man pkg-config)
+(use-package-modules wm admin xdisorg terminals networking bittorrent syncthing password-utils
+					 pciutils package-management fonts ebook vim ocaml gnome pkg-config chromium
+					 audio pulseaudio video web-browsers gnome-xyz freedesktop gnome-xyz xorg qt
+					 linux vnc vim aidc gtk man pkg-config llvm java commencement base shells)
 
 (define %username "gavin")
 (define %email "github@gavinm.us")
@@ -38,6 +39,8 @@
 (define %font "Dejavu Sans 11")
 (define %dark-theme #t)
 (define %opam-feature #t)
+
+(define (home-path path) (string-append "/home/" %username "/" path))
 
 (define McMojave-cursors
   (package
@@ -76,21 +79,45 @@
 	(home-page "https://github.com/J-Lentz/iwgtk")
 	(license gpl3+)))
 
+(define wireguard-tray
+  (package
+	(name "wireguard-tray")
+	(version "0.1")
+	(source (origin
+			  (uri (git-reference
+					 (url "https://github.com/dev-gm/wireguard-tray")
+					 (commit "e5399e427c0904233320b290541fc28f18a59961")))
+			  (method git-fetch)
+			  (sha256
+				(base32
+				  "08b5xg3yv9xrnqcbxqka5h7dzmjlygvznsvpry1gxs4yl85290jk"))))
+	(native-inputs (list pkg-config clang-toolchain))
+	(inputs (list libappindicator gtk+))
+	(build-system copy-build-system)
+	(arguments (list #:phases
+					 #~(modify-phases %standard-phases
+									  (add-before 'install 'install-new
+												 (lambda* (#:key outputs #:allow-other-keys)
+														  (system "rm wireguard-tray")
+														  (invoke "make")
+														  (system (string-append
+																	"mkdir -p "
+																	(assoc-ref outputs "out")
+																	"/bin"))
+														  (system (string-append
+																	"cp wireguard-tray "
+																	(assoc-ref outputs "out")
+																	"/bin/wireguard-tray"))))
+									  (delete 'install))))
+	(description "My wireguard-tray application")
+	(synopsis "A wireguard-tray application")
+	(home-page "https://github.com/dev-gm/wireguard-tray")
+	(license gpl3)))
 
 (define firefox/wayland-114
   (let*
 	((channels
 	   (list (channel
-			   (name 'nonguix)
-			   (url "https://gitlab.com/nonguix/nonguix")
-			   (branch "master")
-			   (commit "91be26a9d59dbeb6a373b6737797852437463f45")
-			   (introduction
-				 (make-channel-introduction
-				   "897c1a470da759236cc11798f4e0a5f7d4d59fbc"
-				   (openpgp-fingerprint
-					 "2A39 3FFF 68F4 EF7A 3D29  12AF 6F51 20A0 22FB B2D5"))))
-			 (channel
 			   (name 'guix)
 			   (url "https://git.savannah.gnu.org/git/guix.git")
 			   (branch "master")
@@ -99,7 +126,17 @@
 				 (make-channel-introduction
 				   "9edb3f66fd807b096b48283debdcddccfea34bad"
 				   (openpgp-fingerprint
-					 "BBB0 2DDF 2CEA F6A8 0D1D  E643 A2A0 6DF2 A33A 54FA"))))))
+					 "BBB0 2DDF 2CEA F6A8 0D1D  E643 A2A0 6DF2 A33A 54FA"))))
+			 (channel
+			   (name 'nonguix)
+			   (url "https://gitlab.com/nonguix/nonguix")
+			   (branch "master")
+			   (commit "91be26a9d59dbeb6a373b6737797852437463f45")
+			   (introduction
+				 (make-channel-introduction
+				   "897c1a470da759236cc11798f4e0a5f7d4d59fbc"
+				   (openpgp-fingerprint
+					 "2A39 3FFF 68F4 EF7A 3D29  12AF 6F51 20A0 22FB B2D5"))))))
 	 (inferior
 	   (inferior-for-channels channels)))
 	(first (lookup-inferior-packages inferior "firefox-wayland"))))
@@ -124,19 +161,24 @@
 		sway bemenu waybar swaylock swaynotificationcenter
 		xorg-server-xwayland qtwayland-5
 		grimshot clipman wl-clipboard solaar
-		iwgtk blueman
+		iwgtk blueman syncthing-gtk wireguard-tray
 		wireplumber pipewire pulseaudio pavucontrol
 		prismlauncher steam firefox/wayland-114 qutebrowser
-		alacritty vim neovim obs obs-wlrobs
-		signal-desktop keepassxc calibre deluge tigervnc-client baobab
-		opam local-utils))
+		alacritty vim neovim fish
+		obs obs-wlrobs signal-desktop keepassxc
+		calibre deluge tigervnc-client baobab
+		openjdk17 opam gcc-toolchain clang-toolchain gnu-make
+		local-utils flatpak))
 
 (define %bash-profile
   (string-append
 (if %opam-feature
   "eval $(opam env)\n"
   "")
-"export PATH=\"$PATH:/home/" %username "/.local/bin:/home/" %username "/.go/bin\"
+"export PATH=\"$PATH:" (home-path ".local/bin") ":"
+	(home-path ".go/bin") ":"
+	(home-path ".android/sdk/cmdline-tools/latest/bin") ":"
+	(home-path ".android/sdk/platform-tools") "\"
 if [ \"$(tty)\" = \"/dev/tty1\" ]; then
 	dbus-run-session sway
 fi"))
@@ -171,7 +213,7 @@ style=" %theme "
 "))
 
 (define %env-variables
-   `(("XDG_DATA_DIRS" . ,(string-append "/home/" %username "/.guix-home/profile/share"))
+   `(("XDG_DATA_DIRS" . ,(home-path ".guix-home/profile/share"))
 	 ("XDG_CURRENT_DESKTOP" . "sway")
 	 ("XDG_SESSION_TYPE" . "wayland")
 	 ("GTK_THEME" . ,%theme)
@@ -184,7 +226,10 @@ style=" %theme "
 	 ("ECORE_EVAS_ENGINE" . "wayland-egl")
 	 ("GDK_BACKEND" . "wayland")
 	 ("_JAVA_AWT_WM_NONREPARENTING" . "1")
-	 ("GOPATH" . ,(string-append "/home/" %username "/.go"))))
+	 ("GOPATH" . ,(home-path ".go"))
+	 ("SDKMANAGER" . ,(home-path ".android/sdk/cmdline-tools/latest/bin/sdkmanager"))
+	 ("ANDROID_SDK_ROOT" . ,(home-path ".android/sdk"))
+	 ("ANDROID_NDK_ROOT" . ,(home-path ".android/sdk/ndk"))))
 
 (define %kvantum-config "theme=MateriaDark")
 
@@ -234,7 +279,8 @@ style=" %theme "
 	("Kvantum/MateriaDark/MateriaDark.kvconfig" ,%kvantum-MateriaDark-config-file)
 	("Kvantum/MateriaDark/MateriaDark.svg" ,%kvantum-MateriaDark-svg-file)
 	("Trolltech.conf" ,(plain-file "Trolltech.conf" %qt4-config))
-	("solaar/config.json" ,(local-file "solaar/config.json"))))
+	("solaar/config.json" ,(local-file "solaar/config.json"))
+	("syncthing-gtk/config.json" ,(local-file "syncthing-gtk/config.json"))))
 
 (define %home-files
   `((".local/share/nvim/site/autoload/plug.vim" ,%vim-plug-file)
