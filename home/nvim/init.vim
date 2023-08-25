@@ -19,8 +19,11 @@ autocmd FileType * set noexpandtab
 autocmd FileType haskell set expandtab
 autocmd FileType python set expandtab
 
-autocmd FocusLost * if &filetype == "vlang" | silent! wa | endif
+autocmd FocusLost * if &filetype == "vlang" | silent! w | endif
 autocmd BufLeave * if &filetype == "vlang" | silent! w | endif
+
+nnoremap <silent><C-s> :w<CR>
+inoremap <silent><C-s> <Esc> :w<CR> i
 
 inoremap jh <Esc>
 cnoremap jh <Esc>
@@ -124,7 +127,7 @@ endif
 let g:airline#extensions#tabline#formatter = 'default'
 
 if !exists('g:airline_symbols')
-  let g:airline_symbols = {}
+	let g:airline_symbols = {}
 endif
 
 " NERDTREE
@@ -140,6 +143,7 @@ nnoremap <silent> <C-f> :NERDTreeFind<CR>
 
 " Exit Vim if NERDTree is the only window remaining in the only tab.
 autocmd BufEnter * if tabpagenr('$') == 1 && winnr('$') == 1 && exists('b:NERDTree') && b:NERDTree.isTabTree() | quit | endif
+
 " GITGUTTER
 function! GitStatus()
   let [a,m,r] = GitGutterGetHunkSummary()
@@ -202,9 +206,10 @@ local capabilities = require('cmp_nvim_lsp').default_capabilities()
 local lspconfig = require('lspconfig')
 
 lspconfig.clangd.setup{ capabilities = capabilities }
+lspconfig.ocamllsp.setup{ capabilities = capabilities }
+lspconfig.pylsp.setup{ capabilities = capabilities }
 lspconfig.rust_analyzer.setup{ capabilities = capabilities }
 lspconfig.vls.setup{ capabilities = capabilities }
-lspconfig.ocamllsp.setup{ capabilities = capabilities }
 
 -- CMP
 local cmp = require('cmp')

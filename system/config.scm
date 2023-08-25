@@ -26,9 +26,9 @@
 			 (srfi srfi-1)
 			 (srfi srfi-171))
 
-(use-service-modules admin authentication base configuration cups dbus desktop games networking pm shepherd syncthing sysctl virtualization vpn)
+(use-service-modules admin authentication base configuration cups dbus desktop games networking nix pm shepherd syncthing sysctl virtualization vpn)
 
-(use-package-modules admin base certs compression cpio dns freedesktop gl networking ntp nvi linux video vpn vulkan)
+(use-package-modules admin base certs compression cpio dns freedesktop gl networking ntp nvi linux package-management video vpn vulkan)
 
 (set! *random-state* (random-state-from-platform))
 
@@ -152,7 +152,7 @@ root ALL=(ALL) ALL
 
 (define %packages (append
 					(list nvi mesa vulkan-loader intel-media-driver intel-vaapi-driver libva
-						  nss-certs iwd openntpd openresolv bluez wireguard-tools light)
+						  nss-certs iwd openntpd openresolv bluez wireguard-tools light nix)
 					%base-packages))
 
 (define (serialize-ini-config config)
@@ -334,7 +334,8 @@ COMMIT
 								   (libvirt-configuration
 									 (unix-sock-group "libvirt")))
 						  (service virtlog-service-type)
-						  (udev-rules-service 'solaar %solaar-udev-rules))
+						  (udev-rules-service 'solaar %solaar-udev-rules)
+						  (service nix-service-type))
 					(modify-services %base-services
 									 (guix-service-type config =>
 														(guix-configuration

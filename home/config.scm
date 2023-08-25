@@ -213,7 +213,7 @@ style=" %theme "
 "))
 
 (define %env-variables
-   `(("XDG_DATA_DIRS" . ,(home-path ".guix-home/profile/share"))
+   `(;("XDG_DATA_DIRS" . ,(home-path ".guix-home/profile/share"))
 	 ("XDG_CURRENT_DESKTOP" . "sway")
 	 ("XDG_SESSION_TYPE" . "wayland")
 	 ("GTK_THEME" . ,%theme)
